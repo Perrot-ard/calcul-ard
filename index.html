@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calcul ARD</title>
+  <style>
+    :root{
+      --cuivre:#C8752B;
+      --beige:#F7F5F2;
+      --beige-pierre:#E8DCC9;
+      --bleu:#D7DFE2;
+      --texte:#1F2A34;
+      --muted:#6B7280;
+      --bord:#E5DED4;
+      --shadow:0 8px 24px rgba(31,42,52,.08);
+      --radius:18px;
+      --green:#2D7A46;
+      --danger:#A33A2A;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--beige);
+      color:var(--texte);
+      font-family:Arial, sans-serif;
+    }
+    body{min-height:100vh}
+
+    .app{
+      max-width:940px;
+      margin:0 auto;
+      padding:20px 16px 180px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .logo-box{
+      width:68px;
+      height:68px;
+      border-radius:16px;
+      background:#fff;
+      border:1px solid var(--bord);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      flex:0 0 auto;
+      padding:6px;
+    }
+
+    .logo-box img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    .logo-fallback{
+      font-weight:800;
+      color:var(--cuivre);
+      letter-spacing:.06em;
+      font-size:16px;
+      display:none;
+    }
+
+    .title-wrap h1{
+      margin:0;
+      font-size:34px;
+      line-height:1;
+      font-weight:800;
+    }
+
+    .title-wrap p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      border:none;
+      border-radius:16px;
+      padding:14px 18px;
+      font-weight:700;
+      font-size:16px;
+      cursor:pointer;
+      transition:.18s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      box-shadow:none;
+    }
+
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{background:var(--cuivre); color:#fff;}
+    .btn-ghost{background:transparent; color:var(--cuivre); border:2px solid var(--cuivre);}
+    .btn-soft{background:var(--beige-pierre); color:var(--cuivre); border:2px solid transparent;}
+    .btn-muted{background:#fff; color:var(--texte); border:1px solid var(--bord);}
+    .btn-danger{background:#fff; color:var(--danger); border:1px solid #E7C5BF;}
+    .btn-compact{min-height:52px; padding:12px 14px; border-radius:14px; font-size:15px;}
+
+    .card{
+      background:#fff;
+      border:1px solid rgba(31,42,52,.06);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:18px;
+    }
+
+    .card-muted{background:var(--beige-pierre); border:none;}
+    .card-blue{background:var(--bleu); border:none;}
+
+    .section-title{
+      margin:8px 0 14px;
+      font-size:15px;
+      font-weight:800;
+      letter-spacing:.18em;
+      color:#707884;
+      text-transform:uppercase;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .field{margin-bottom:16px;}
+
+    .field label{
+      display:block;
+      margin-bottom:10px;
+      font-size:15px;
+      font-weight:700;
+      color:#5b6470;
+    }
+
+    input[type="text"],
+    input[type="number"]{
+      width:100%;
+      border:none;
+      outline:none;
+      background:#fff;
+      border:1px solid var(--bord);
+      border-radius:18px;
+      padding:18px 16px;
+      font-size:18px;
+      color:var(--texte);
+      appearance:textfield;
+      -moz-appearance:textfield;
+    }
+
+    input.large-number{
+      font-size:54px;
+      font-weight:800;
+      padding:22px 18px;
+      line-height:1.1;
+    }
+
+    .field.beige input{
+      background:var(--beige-pierre);
+      border-color:transparent;
+    }
+
+    .help{
+      margin-top:8px;
+      color:#8A919B;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .mini-note{
+      color:#8C939D;
+      font-size:13px;
+      line-height:1.45;
+      margin-top:6px;
+    }
+
+    .choices{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-bottom:12px;
+    }
+
+    .choice{
+      min-height:84px;
+      font-size:18px;
+      border-radius:18px;
+    }
+
+    .choice.active{
+      background:var(--cuivre);
+      color:#fff;
+      border-color:var(--cuivre);
+    }
+
+    .kpi-inline{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      background:var(--beige-pierre);
+      border-radius:18px;
+      padding:18px 20px;
+      margin-bottom:18px;
+    }
+
+    .kpi-inline .label{
+      color:#6A717C;
+      font-weight:700;
+      font-size:16px;
+    }
+
+    .kpi-inline .value{
+      color:var(--cuivre);
+      font-size:32px;
+      font-weight:800;
+    }
+
+    .preview-time{
+      border:2px solid var(--cuivre);
+      border-radius:20px;
+      padding:18px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      background:#fff8f1;
+      margin-bottom:12px;
+    }
+
+    .preview-time .big{
+      font-size:44px;
+      font-weight:800;
+      color:var(--cuivre);
+      line-height:1;
+      white-space:nowrap;
+    }
+
+    .preview-time .small{
+      font-size:17px;
+      font-weight:800;
+      line-height:1.3;
+    }
+
+    .preview-sub{
+      margin-top:6px;
+      color:#6A717C;
+      font-size:14px;
+      font-weight:700;
+      line-height:1.45;
+    }
+
+    .live-total-box{
+      background:var(--beige-pierre);
+      border-radius:20px;
+      padding:18px 20px;
+      margin-bottom:18px;
+      border:2px solid transparent;
+    }
+
+    .live-total-box .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+    }
+
+    .live-total-box .label{
+      font-size:18px;
+      font-weight:800;
+      color:var(--texte);
+      line-height:1.25;
+    }
+
+    .live-total-box .value{
+      font-size:38px;
+      font-weight:800;
+      color:var(--cuivre);
+      white-space:nowrap;
+    }
+
+    .live-total-box .sub{
+      margin-top:8px;
+      color:#6A717C;
+      font-size:14px;
+      font-weight:700;
+      line-height:1.45;
+    }
+
+    .calc-btn{
+      width:100%;
+      min-height:88px;
+      font-size:24px;
+      border-radius:22px;
+      margin-top:10px;
+    }
+
+    .accordion-toggle{
+      width:100%;
+      justify-content:space-between;
+      padding:18px 20px;
+      font-size:20px;
+      background:var(--beige-pierre);
+      color:var(--texte);
+      border:1px solid transparent;
+      margin-bottom:14px;
+    }
+
+    .accordion-body{
+      display:none;
+      animation:fadeIn .2s ease;
+    }
+
+    .accordion-body.open{display:block}
+
+    @keyframes fadeIn{
+      from{opacity:0; transform:translateY(6px)}
+      to{opacity:1; transform:none}
+    }
+
+    .annexe-layout{
+      display:grid;
+      gap:16px;
+    }
+
+    .annexe-card{
+      background:#fff;
+      border:1px solid rgba(31,42,52,.08);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:0 4px 16px rgba(31,42,52,.04);
+    }
+
+    .annexe-card-title{
+      margin:0 0 14px;
+      font-size:15px;
+      font-weight:800;
+      letter-spacing:.16em;
+      color:#707884;
+      text-transform:uppercase;
+    }
+
+    .results-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:16px;
+    }
+
+    .back-link{
+      color:var(--cuivre);
+      background:none;
+      border:none;
+      padding:0;
+      font-size:18px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .results-title{
+      margin:0;
+      font-size:42px;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .saved-msg{
+      display:none;
+      margin:10px 0 0;
+      font-size:14px;
+      color:var(--green);
+      font-weight:700;
+    }
+
+    .saved-msg.show{display:block}
+
+    .line-item{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      padding:10px 0;
+      border-bottom:1px solid #E9EDF0;
+      font-size:18px;
+    }
+
+    .line-item:last-child{border-bottom:none}
+
+    .line-item .label{
+      color:#5F6772;
+    }
+
+    .line-item .value{
+      font-weight:800;
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    .line-item strong.cuivre{
+      color:var(--cuivre);
+      font-size:28px;
+    }
+
+    .weeks-row{
+      margin-top:10px;
+      font-size:15px;
+      color:#6A717C;
+      font-weight:700;
+      line-height:1.45;
+    }
+
+    .total-box{
+      background:var(--cuivre);
+      color:#fff;
+      border-radius:24px;
+      padding:26px 22px;
+      margin-top:18px;
+      text-align:center;
+    }
+
+    .total-box .over{
+      font-size:16px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      opacity:.95;
+      margin-bottom:8px;
+    }
+
+    .total-box .big{
+      font-size:64px;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .total-box .unit{
+      font-size:28px;
+      font-weight:700;
+      margin-left:8px;
+    }
+
+    .muted-center{
+      text-align:center;
+      color:#8A919B;
+      margin:22px 0;
+      line-height:1.45;
+    }
+
+    .bottom-actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      padding-bottom:130px;
+    }
+
+    .bottom-actions .btn{
+      min-width:160px;
+      min-height:56px;
+      flex:1 1 180px;
+      font-size:18px;
+    }
+
+    .hidden{display:none !important}
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(20,26,34,.42);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      z-index:50;
+      padding:14px;
+    }
+
+    .modal-backdrop.show{display:flex}
+
+    .modal{
+      width:min(900px,100%);
+      max-height:85vh;
+      overflow:auto;
+      background:#fff;
+      border-radius:24px 24px 16px 16px;
+      box-shadow:0 20px 50px rgba(0,0,0,.25);
+      padding:20px;
+    }
+
+    .modal-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    .modal-head h3{
+      margin:0;
+      font-size:26px;
+      font-weight:800;
+    }
+
+    .saved-project{
+      border:1px solid var(--bord);
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+    }
+
+    .saved-project .meta{
+      color:#7C848E;
+      font-size:14px;
+      line-height:1.4;
+      margin-top:6px;
+    }
+
+    .saved-project .name{
+      font-weight:800;
+      font-size:18px;
+    }
+
+    .saved-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .empty-state{
+      padding:18px;
+      background:#FAFBFC;
+      border:1px dashed #D6DDE3;
+      border-radius:18px;
+      color:#7B838D;
+      text-align:center;
+    }
+
+    @media (max-width: 740px){
+      .title-wrap h1{font-size:28px}
+      .grid-2{grid-template-columns:1fr}
+      .topbar{align-items:flex-start; flex-direction:column}
+      .top-actions{width:100%; justify-content:flex-start}
+      .results-title{font-size:34px}
+      .preview-time,
+      .live-total-box .top{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .preview-time .big,
+      .live-total-box .value{font-size:40px}
+      .line-item{font-size:17px}
+      .bottom-actions{gap:10px}
+      .bottom-actions .btn{
+        min-width:unset;
+        flex:1 1 calc(50% - 10px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="viewForm">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo-box">
+            <img id="logoImg" src="logo site.jpg" alt="Logo ARD Academy" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='block';" />
+            <div id="logoFallback" class="logo-fallback">ARD</div>
+          </div>
+          <div class="title-wrap">
+            <h1>Calcul ARD</h1>
+            <p>Outil chantier rapide et chiffrage optionnel</p>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button class="btn btn-soft" id="btnSavedProjects">📁 Mes chantiers</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Chantier</div>
+
+        <div class="field">
+          <label for="chantierNom">Nom du chantier</label>
+          <input type="text" id="chantierNom" placeholder="Ex : Villa Bretagne / Aquarium Berlin / Client X" />
+          <div class="saved-msg" id="savedMsg">Chantier enregistré</div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="surfaceMoins3">Décor moins de 3 m (m²)</label>
+            <input class="large-number" type="number" min="0" step="0.1" id="surfaceMoins3" value="0" />
+          </div>
+
+          <div class="field">
+            <label for="surfacePlus3">Décor plus de 3 m (m²)</label>
+            <input class="large-number" type="number" min="0" step="0.1" id="surfacePlus3" value="0" />
+          </div>
+        </div>
+
+        <div class="kpi-inline">
+          <div class="label">Surface totale</div>
+          <div class="value" id="surfaceTotaleDisplay">0 m²</div>
+        </div>
+
+        <div class="section-title">Qualité</div>
+        <div class="choices">
+          <button class="btn btn-ghost choice active" data-group="qualite" data-value="moyenne">Moyenne</button>
+          <button class="btn btn-ghost choice" data-group="qualite" data-value="superieure">Supérieure</button>
+        </div>
+
+        <div class="section-title">Conditions</div>
+        <div class="choices">
+          <button class="btn btn-ghost choice active" data-group="conditions" data-value="normal">Normal</button>
+          <button class="btn btn-ghost choice" data-group="conditions" data-value="difficile">Difficile</button>
+        </div>
+
+        <div class="preview-time">
+          <div>
+            <div class="small">Temps chantier estimatif<br>(hors route)</div>
+            <div class="preview-sub" id="previewWeeks">0 jour</div>
+          </div>
+          <div>
+            <span class="big" id="previewTimeValue">0</span>
+            <span class="small">jours</span>
+          </div>
+        </div>
+
+        <div class="mini-note">
+          Estimation indicative basée sur une équipe type de 3 à 4 personnes.<br>
+          Le temps réel varie selon la qualité demandée, la difficulté du chantier, l’organisation et les conditions d’exécution.
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label for="heuresRoute">Heures de route prévues</label>
+          <input type="number" min="0" step="0.1" id="heuresRoute" placeholder="Ex : 4, 8, 12" />
+          <div class="help">
+            Indiquer le nombre total d’heures de route aller + retour à ajouter au chantier.<br>
+            Exemple : si plusieurs allers-retours sont prévus, additionner toutes les heures.
+          </div>
+        </div>
+
+        <div class="live-total-box">
+          <div class="top">
+            <div class="label">Temps total estimatif<br>avec route</div>
+            <div>
+              <span class="value" id="liveTotalDays">0</span>
+              <span class="label">jours</span>
+            </div>
+          </div>
+          <div class="sub" id="liveTotalWeeks">0 jour</div>
+        </div>
+
+        <div class="annexe-card" style="margin-top:16px; margin-bottom:16px;">
+          <h3 class="annexe-card-title">Frais additionnels</h3>
+          <div class="mini-note" style="margin-bottom:14px;">
+            Base temps indicative pensée pour une équipe de 3 à 4 personnes.
+          </div>
+
+          <div class="grid-2">
+            <div class="field beige">
+              <label for="mainOeuvre">Main-d’œuvre chantier (€)</label>
+              <input type="number" step="0.01" id="mainOeuvre" placeholder="Optionnel" />
+              <div class="mini-note">Le temps estimatif de l’application est basé sur une équipe type de 3 à 4 personnes.</div>
+            </div>
+
+            <div class="field beige">
+              <label for="logement">Logement / hébergement (€)</label>
+              <input type="number" step="0.01" id="logement" placeholder="Optionnel" />
+            </div>
+
+            <div class="field beige">
+              <label for="locationMateriel">Location matériel (€)</label>
+              <input type="number" step="0.01" id="locationMateriel" placeholder="Optionnel" />
+              <div class="mini-note">Ex : nacelle, échafaudage, machine projection, compresseur…</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn accordion-toggle" id="toggleCosts">
+          <span>Annexe coûts (optionnelle)</span>
+          <span id="toggleCostsChevron">▾</span>
+        </button>
+
+        <div class="accordion-body" id="costsPanel">
+          <div class="annexe-layout">
+            <div class="annexe-card">
+              <h3 class="annexe-card-title">Prix matériaux</h3>
+              <div class="grid-2">
+                <div class="field beige">
+                  <label for="prixAcier">Acier (€/ml)</label>
+                  <input type="number" step="0.001" id="prixAcier" value="0.8" />
+                  <div class="mini-note">Base conseillée : 0,8 € / ml</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="prixGrillage">Grillage (€/m²)</label>
+                  <input type="number" step="0.001" id="prixGrillage" value="6" />
+                  <div class="mini-note">Base conseillée : 6 € / m²</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="prixBeton">Béton sac 25 kg (€)</label>
+                  <input type="number" step="0.001" id="prixBeton" value="13" />
+                  <div class="mini-note">Base conseillée : 13 € / sac</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="prixBaguette">Baguette (€ / u)</label>
+                  <input type="number" step="0.001" id="prixBaguette" value="0.36" />
+                  <div class="mini-note">Base conseillée : 0,36 € / u</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="prixAgrafe">Agrafe (€ / u)</label>
+                  <input type="number" step="0.001" id="prixAgrafe" value="0.015" />
+                  <div class="mini-note">Base conseillée : 0,015 € / u</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="prixVernis">Vernis (€ / L)</label>
+                  <input type="number" step="0.001" id="prixVernis" value="8" />
+                  <div class="mini-note">Base conseillée : 8 € / L</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="annexe-card">
+              <h3 class="annexe-card-title">Ratios techniques</h3>
+              <div class="grid-2">
+                <div class="field beige">
+                  <label for="ratioAcier">Acier (ml / m²)</label>
+                  <input type="number" step="0.1" id="ratioAcier" value="12" />
+                  <div class="mini-note">Base conseillée : 12 ml / m²</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="ratioGrillage">Grillage (m² / m² décor)</label>
+                  <input type="number" step="0.01" id="ratioGrillage" value="1.1" />
+                  <div class="mini-note">Base conseillée : 1,1 m² / m² décor<br>Inclut ~10 % de recouvrement</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="ratioBeton">Béton (sacs / m²)</label>
+                  <input type="number" step="0.1" id="ratioBeton" value="3.4" />
+                  <div class="mini-note">Base moyenne : 3,4 sacs / m²<br>Base supérieure : 3,8 sacs / m²</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="ratioBaguette">Baguettes (u / m²)</label>
+                  <input type="number" step="0.1" id="ratioBaguette" value="6" />
+                  <div class="mini-note">Base conseillée : 6 u / m²</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="ratioAgrafe">Agrafes (u / m²)</label>
+                  <input type="number" step="0.1" id="ratioAgrafe" value="50" />
+                  <div class="mini-note">Base conseillée : 50 u / m²</div>
+                </div>
+
+                <div class="field beige">
+                  <label for="ratioVernis">Vernis (L / m²)</label>
+                  <input type="number" step="0.01" id="ratioVernis" value="0.2" />
+                  <div class="mini-note">Base conseillée : 0,2 L / m²</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary calc-btn" id="btnCalculer">Calculer</button>
+      </div>
+    </div>
+
+    <div id="viewResults" class="hidden">
+      <div class="results-header">
+        <button class="back-link" id="btnBack">← Retour</button>
+        <button class="btn btn-soft" id="btnNew">➕ Nouveau</button>
+      </div>
+
+      <h2 class="results-title">Résultats</h2>
+      <div id="resultNom" style="font-size:26px;font-weight:700;color:var(--cuivre);margin:12px 0 20px;"></div>
+
+      <div class="card card-muted">
+        <div class="section-title">Surfaces</div>
+        <div class="line-item"><div class="label">Décor moins de 3 m</div><div class="value" id="rMoins3">0 m²</div></div>
+        <div class="line-item"><div class="label">Décor plus de 3 m</div><div class="value" id="rPlus3">0 m²</div></div>
+        <div class="line-item"><div class="label"><strong>Surface totale</strong></div><div class="value"><strong class="cuivre" id="rSurfaceTotale">0 m²</strong></div></div>
+      </div>
+
+      <div class="card card-muted">
+        <div class="section-title">Paramètres</div>
+        <div class="line-item"><div class="label">Qualité</div><div class="value" id="rQualite">Moyenne</div></div>
+        <div class="line-item"><div class="label">Conditions</div><div class="value" id="rConditions">Normal</div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Matériaux</div>
+        <div class="line-item"><div class="label">Acier 7 mm (<span id="qAcier">0</span> ml)</div><div class="value" id="cAcier">0 €</div></div>
+        <div class="line-item"><div class="label">Grillage (<span id="qGrillage">0</span> m²)</div><div class="value" id="cGrillage">0 €</div></div>
+        <div class="line-item"><div class="label">Béton (<span id="qBeton">0</span> sacs)</div><div class="value" id="cBeton">0 €</div></div>
+        <div class="line-item"><div class="label">Baguettes (<span id="qBaguette">0</span> u)</div><div class="value" id="cBaguette">0 €</div></div>
+        <div class="line-item"><div class="label">Agrafes (<span id="qAgrafe">0</span> u)</div><div class="value" id="cAgrafe">0 €</div></div>
+        <div class="line-item"><div class="label">Vernis (<span id="qVernis">0</span> L)</div><div class="value" id="cVernis">0 €</div></div>
+        <div class="line-item"><div class="label">Patines</div><div class="value">Prévoir minimum 4 couleurs</div></div>
+        <div class="line-item"><div class="label"><strong>Total matériaux</strong></div><div class="value"><strong class="cuivre" id="rTotalMateriaux">0 €</strong></div></div>
+      </div>
+
+      <div class="card card-blue">
+        <div class="section-title">Temps estimatif</div>
+        <div class="line-item"><div class="label">Temps chantier estimatif</div><div class="value" id="rTempsChantier">0 jours</div></div>
+        <div class="weeks-row" id="rTempsChantierSemaines">0 jour</div>
+
+        <div class="line-item" id="rowTempsRoute"><div class="label">Temps route</div><div class="value" id="rTempsRoute">0 jours</div></div>
+
+        <div class="line-item"><div class="label">Temps total estimatif</div><div class="value" id="rTempsTotal">0 jours</div></div>
+        <div class="weeks-row" id="rTempsTotalSemaines">0 jour</div>
+
+        <div class="mini-note" style="margin-top:14px;color:#5F6772;">
+          Estimation indicative basée sur une équipe type de 3 à 4 personnes.<br>
+          Le temps réel varie selon la qualité demandée, la difficulté du chantier, l’organisation et les conditions d’exécution.
+        </div>
+
+        <div class="total-box">
+          <div class="over">Total arrondi</div>
+          <div><span class="big" id="rTempsArrondi">0</span><span class="unit">jours</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Coûts</div>
+        <div class="line-item"><div class="label">Total matériaux</div><div class="value" id="sumMat">0 €</div></div>
+        <div class="line-item hidden" id="rowMo"><div class="label">Main-d’œuvre</div><div class="value" id="sumMo">0 €</div></div>
+        <div class="line-item hidden" id="rowLog"><div class="label">Logement / hébergement</div><div class="value" id="sumLog">0 €</div></div>
+        <div class="line-item hidden" id="rowLocMat"><div class="label">Location matériel</div><div class="value" id="sumLocMat">0 €</div></div>
+        <div class="line-item"><div class="label"><strong>Total général</strong></div><div class="value"><strong class="cuivre" id="sumGeneral">0 €</strong></div></div>
+      </div>
+
+      <div class="muted-center">
+        Matériaux et coûts matériaux calculés sur les ratios saisis. Temps indicatif.
+      </div>
+
+      <div class="bottom-actions">
+        <button class="btn btn-primary" id="btnWhatsapp">📨 WhatsApp</button>
+        <button class="btn btn-ghost" id="btnPdf">📄 PDF</button>
+        <button class="btn btn-primary" id="btnModifier">✏️ Modifier</button>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="savedProjectsModal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3>Mes chantiers</h3>
+          <button class="btn btn-muted" id="btnCloseProjects">Fermer</button>
+        </div>
+        <div id="savedProjectsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEYS = {
+      globalSettings: "calcul_ard_global_settings_v11",
+      savedProjects: "calcul_ard_saved_projects_v11"
+    };
+
+    const state = {
+      qualite: "moyenne",
+      conditions: "normal",
+      lastResults: null,
+      betonManuel: false
+    };
+
+    const defaultSettings = {
+      prixAcier: 0.8,
+      prixGrillage: 6,
+      prixBeton: 13,
+      prixBaguette: 0.36,
+      prixAgrafe: 0.015,
+      prixVernis: 8,
+      ratioAcier: 12,
+      ratioGrillage: 1.1,
+      ratioBeton: 3.4,
+      ratioBaguette: 6,
+      ratioAgrafe: 50,
+      ratioVernis: 0.2
+    };
+
+    const els = {
+      viewForm: document.getElementById("viewForm"),
+      viewResults: document.getElementById("viewResults"),
+      chantierNom: document.getElementById("chantierNom"),
+      surfaceMoins3: document.getElementById("surfaceMoins3"),
+      surfacePlus3: document.getElementById("surfacePlus3"),
+      surfaceTotaleDisplay: document.getElementById("surfaceTotaleDisplay"),
+      heuresRoute: document.getElementById("heuresRoute"),
+      previewTimeValue: document.getElementById("previewTimeValue"),
+      previewWeeks: document.getElementById("previewWeeks"),
+      liveTotalDays: document.getElementById("liveTotalDays"),
+      liveTotalWeeks: document.getElementById("liveTotalWeeks"),
+      toggleCosts: document.getElementById("toggleCosts"),
+      toggleCostsChevron: document.getElementById("toggleCostsChevron"),
+      costsPanel: document.getElementById("costsPanel"),
+      btnCalculer: document.getElementById("btnCalculer"),
+      btnBack: document.getElementById("btnBack"),
+      btnModifier: document.getElementById("btnModifier"),
+      btnWhatsapp: document.getElementById("btnWhatsapp"),
+      btnPdf: document.getElementById("btnPdf"),
+      btnNew: document.getElementById("btnNew"),
+      btnSavedProjects: document.getElementById("btnSavedProjects"),
+      savedProjectsModal: document.getElementById("savedProjectsModal"),
+      btnCloseProjects: document.getElementById("btnCloseProjects"),
+      savedProjectsList: document.getElementById("savedProjectsList"),
+      savedMsg: document.getElementById("savedMsg"),
+      resultNom: document.getElementById("resultNom"),
+      rowTempsRoute: document.getElementById("rowTempsRoute"),
+      rowMo: document.getElementById("rowMo"),
+      rowLog: document.getElementById("rowLog"),
+      rowLocMat: document.getElementById("rowLocMat"),
+      ratioBeton: document.getElementById("ratioBeton")
+    };
+
+    const settingInputs = [
+      "prixAcier","prixGrillage","prixBeton","prixBaguette","prixAgrafe","prixVernis",
+      "ratioAcier","ratioGrillage","ratioBeton","ratioBaguette","ratioAgrafe","ratioVernis"
+    ];
+
+    function toNumber(v){
+      if (v === null || v === undefined || v === "") return 0;
+      return Number(String(v).replace(",", ".")) || 0;
+    }
+
+    function formatMoney(v){
+      return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(v || 0);
+    }
+
+    function formatNum(v, digits = 1){
+      const n = Number(v || 0);
+      return Number.isInteger(n)
+        ? String(n)
+        : n.toFixed(digits).replace(/\.0+$/,"").replace(".", ",");
+    }
+
+    function formatWeeksDays(days){
+      const d = Number(days || 0);
+      const weeks = Math.floor(d / 5);
+      const rest = d - (weeks * 5);
+      if (weeks <= 0) return `${formatNum(d)} jour${d > 1 ? "s" : ""}`;
+      if (rest <= 0.05) return `${weeks} semaine${weeks > 1 ? "s" : ""}`;
+      return `${weeks} semaine${weeks > 1 ? "s" : ""} + ${formatNum(rest)} jour${rest > 1 ? "s" : ""}`;
+    }
+
+    function nowDateFr(){
+      return new Date().toLocaleDateString("fr-FR");
+    }
+
+    function getSettings(){
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.globalSettings) || "null");
+      return { ...defaultSettings, ...(stored || {}) };
+    }
+
+    function saveSettings(){
+      const payload = {};
+      settingInputs.forEach(id => {
+        payload[id] = toNumber(document.getElementById(id).value);
+      });
+      localStorage.setItem(STORAGE_KEYS.globalSettings, JSON.stringify(payload));
+    }
+
+    function getDefaultBetonRatio(){
+      return state.qualite === "superieure" ? 3.8 : 3.4;
+    }
+
+    function applyDefaultBetonRatio(force = false){
+      if (!state.betonManuel || force){
+        els.ratioBeton.value = getDefaultBetonRatio();
+        saveSettings();
+      }
+    }
+
+    function applySettingsToInputs(){
+      const s = getSettings();
+      settingInputs.forEach(id => {
+        document.getElementById(id).value = s[id];
+      });
+    }
+
+    function getSavedProjects(){
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.savedProjects) || "[]");
+    }
+
+    function saveSavedProjects(projects){
+      localStorage.setItem(STORAGE_KEYS.savedProjects, JSON.stringify(projects));
+    }
+
+    function getSurfaceTotale(){
+      return toNumber(els.surfaceMoins3.value) + toNumber(els.surfacePlus3.value);
+    }
+
+    function getProductiviteJour(){
+      // Base indicative équipe 3 à 4 personnes
+      // moyenne + normal = 12 m²/j
+      // moyenne + difficile = 10 m²/j
+      // supérieure + normal = 10 m²/j
+      // supérieure + difficile = 8 m²/j
+      if (state.qualite === "superieure" && state.conditions === "difficile") return 8;
+      if (state.qualite === "superieure" && state.conditions === "normal") return 10;
+      if (state.qualite === "moyenne" && state.conditions === "difficile") return 10;
+      return 12;
+    }
+
+    function computePreviewTime(){
+      return getSurfaceTotale() / getProductiviteJour();
+    }
+
+    function updateLivePreview(){
+      const surfaceTotale = getSurfaceTotale();
+      const chantier = computePreviewTime();
+      const route = toNumber(els.heuresRoute.value) > 0 ? toNumber(els.heuresRoute.value) / 8 : 0;
+      const total = chantier + route;
+
+      els.surfaceTotaleDisplay.textContent = `${formatNum(surfaceTotale)} m²`;
+      els.previewTimeValue.textContent = formatNum(chantier);
+      els.previewWeeks.textContent = formatWeeksDays(chantier);
+      els.liveTotalDays.textContent = formatNum(total);
+      els.liveTotalWeeks.textContent = formatWeeksDays(total);
+    }
+
+    function computeAll(){
+      const nom = els.chantierNom.value.trim();
+      const moins3 = toNumber(els.surfaceMoins3.value);
+      const plus3 = toNumber(els.surfacePlus3.value);
+      const surfaceTotale = moins3 + plus3;
+      const heuresRoute = toNumber(els.heuresRoute.value);
+      const settings = getSettings();
+
+      const tempsChantier = surfaceTotale / getProductiviteJour();
+      const tempsRoute = heuresRoute > 0 ? heuresRoute / 8 : 0;
+      const tempsTotal = tempsChantier + tempsRoute;
+      const tempsArrondi = Math.ceil(tempsTotal);
+
+      const qAcier = surfaceTotale * settings.ratioAcier;
+      const qGrillage = surfaceTotale * settings.ratioGrillage;
+      const qBeton = surfaceTotale * settings.ratioBeton;
+      const qBaguette = surfaceTotale * settings.ratioBaguette;
+      const qAgrafe = surfaceTotale * settings.ratioAgrafe;
+      const qVernis = surfaceTotale * settings.ratioVernis;
+
+      const cAcier = qAcier * settings.prixAcier;
+      const cGrillage = qGrillage * settings.prixGrillage;
+      const cBeton = qBeton * settings.prixBeton;
+      const cBaguette = qBaguette * settings.prixBaguette;
+      const cAgrafe = qAgrafe * settings.prixAgrafe;
+      const cVernis = qVernis * settings.prixVernis;
+
+      const totalMateriaux = cAcier + cGrillage + cBeton + cBaguette + cAgrafe + cVernis;
+
+      const mainOeuvre = toNumber(document.getElementById("mainOeuvre").value);
+      const logement = toNumber(document.getElementById("logement").value);
+      const locationMateriel = toNumber(document.getElementById("locationMateriel").value);
+      const totalGeneral = totalMateriaux + mainOeuvre + logement + locationMateriel;
+
+      return {
+        nom,
+        date: nowDateFr(),
+        qualite: state.qualite,
+        conditions: state.conditions,
+        moins3,
+        plus3,
+        surfaceTotale,
+        heuresRoute,
+        tempsChantier,
+        tempsRoute,
+        tempsTotal,
+        tempsArrondi,
+        quantities: {
+          acier: qAcier,
+          grillage: qGrillage,
+          beton: qBeton,
+          baguette: qBaguette,
+          agrafe: qAgrafe,
+          vernis: qVernis
+        },
+        costs: {
+          acier: cAcier,
+          grillage: cGrillage,
+          beton: cBeton,
+          baguette: cBaguette,
+          agrafe: cAgrafe,
+          vernis: cVernis,
+          totalMateriaux,
+          mainOeuvre,
+          logement,
+          locationMateriel,
+          totalGeneral
+        }
+      };
+    }
+
+    function fillResults(data){
+      state.lastResults = data;
+
+      els.resultNom.textContent = data.nom || "Chantier sans nom";
+      document.getElementById("rMoins3").textContent = `${formatNum(data.moins3)} m²`;
+      document.getElementById("rPlus3").textContent = `${formatNum(data.plus3)} m²`;
+      document.getElementById("rSurfaceTotale").textContent = `${formatNum(data.surfaceTotale)} m²`;
+      document.getElementById("rQualite").textContent = data.qualite === "superieure" ? "Supérieure" : "Moyenne";
+      document.getElementById("rConditions").textContent = data.conditions === "difficile" ? "Difficile" : "Normal";
+
+      document.getElementById("qAcier").textContent = formatNum(data.quantities.acier);
+      document.getElementById("qGrillage").textContent = formatNum(data.quantities.grillage);
+      document.getElementById("qBeton").textContent = formatNum(data.quantities.beton);
+      document.getElementById("qBaguette").textContent = formatNum(data.quantities.baguette);
+      document.getElementById("qAgrafe").textContent = formatNum(data.quantities.agrafe);
+      document.getElementById("qVernis").textContent = formatNum(data.quantities.vernis);
+
+      document.getElementById("cAcier").textContent = formatMoney(data.costs.acier);
+      document.getElementById("cGrillage").textContent = formatMoney(data.costs.grillage);
+      document.getElementById("cBeton").textContent = formatMoney(data.costs.beton);
+      document.getElementById("cBaguette").textContent = formatMoney(data.costs.baguette);
+      document.getElementById("cAgrafe").textContent = formatMoney(data.costs.agrafe);
+      document.getElementById("cVernis").textContent = formatMoney(data.costs.vernis);
+      document.getElementById("rTotalMateriaux").textContent = formatMoney(data.costs.totalMateriaux);
+
+      document.getElementById("rTempsChantier").textContent = `${formatNum(data.tempsChantier)} jours`;
+      document.getElementById("rTempsRoute").textContent = `${formatNum(data.tempsRoute)} jours`;
+      document.getElementById("rTempsTotal").textContent = `${formatNum(data.tempsTotal)} jours`;
+      document.getElementById("rTempsArrondi").textContent = formatNum(data.tempsArrondi,0);
+      document.getElementById("rTempsChantierSemaines").textContent = formatWeeksDays(data.tempsChantier);
+      document.getElementById("rTempsTotalSemaines").textContent = formatWeeksDays(data.tempsTotal);
+
+      els.rowTempsRoute.classList.toggle("hidden", data.tempsRoute <= 0);
+
+      document.getElementById("sumMat").textContent = formatMoney(data.costs.totalMateriaux);
+      document.getElementById("sumGeneral").textContent = formatMoney(data.costs.totalGeneral);
+
+      if (data.costs.mainOeuvre > 0){
+        els.rowMo.classList.remove("hidden");
+        document.getElementById("sumMo").textContent = formatMoney(data.costs.mainOeuvre);
+      } else {
+        els.rowMo.classList.add("hidden");
+      }
+
+      if (data.costs.logement > 0){
+        els.rowLog.classList.remove("hidden");
+        document.getElementById("sumLog").textContent = formatMoney(data.costs.logement);
+      } else {
+        els.rowLog.classList.add("hidden");
+      }
+
+      if (data.costs.locationMateriel > 0){
+        els.rowLocMat.classList.remove("hidden");
+        document.getElementById("sumLocMat").textContent = formatMoney(data.costs.locationMateriel);
+      } else {
+        els.rowLocMat.classList.add("hidden");
+      }
+    }
+
+    function saveCurrentProjectIfNamed(data){
+      if (!data.nom) return;
+      const projects = getSavedProjects();
+      const idx = projects.findIndex(p => p.nom.toLowerCase() === data.nom.toLowerCase());
+
+      const projectPayload = {
+        ...data,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (idx >= 0){
+        projects[idx] = projectPayload;
+        showSavedMessage("Chantier mis à jour");
+      } else {
+        projects.unshift(projectPayload);
+        showSavedMessage("Chantier enregistré");
+      }
+
+      saveSavedProjects(projects);
+      renderSavedProjects();
+    }
+
+    function showSavedMessage(msg){
+      els.savedMsg.textContent = msg;
+      els.savedMsg.classList.add("show");
+      clearTimeout(showSavedMessage._t);
+      showSavedMessage._t = setTimeout(() => {
+        els.savedMsg.classList.remove("show");
+      }, 2200);
+    }
+
+    function renderSavedProjects(){
+      const projects = getSavedProjects();
+      if (!projects.length){
+        els.savedProjectsList.innerHTML = `<div class="empty-state">Aucun chantier enregistré pour le moment.</div>`;
+        return;
+      }
+
+      els.savedProjectsList.innerHTML = projects.map((p, idx) => `
+        <div class="saved-project">
+          <div>
+            <div class="name">${escapeHtml(p.nom || "Sans nom")}</div>
+            <div class="meta">
+              Mis à jour : ${new Date(p.updatedAt).toLocaleString("fr-FR")}<br>
+              Surface : ${formatNum(p.surfaceTotale)} m² — Total arrondi : ${formatNum(p.tempsArrondi,0)} jours
+            </div>
+          </div>
+          <div class="saved-actions">
+            <button class="btn btn-soft btn-compact" onclick="openSavedProject(${idx})">Ouvrir</button>
+            <button class="btn btn-danger btn-compact" onclick="deleteSavedProject(${idx})">Supprimer</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function openSavedProject(index){
+      const projects = getSavedProjects();
+      const p = projects[index];
+      if (!p) return;
+
+      els.chantierNom.value = p.nom || "";
+      els.surfaceMoins3.value = p.moins3 ?? 0;
+      els.surfacePlus3.value = p.plus3 ?? 0;
+      els.heuresRoute.value = p.heuresRoute ?? "";
+
+      state.qualite = p.qualite || "moyenne";
+      state.conditions = p.conditions || "normal";
+      syncChoiceButtons();
+
+      document.getElementById("mainOeuvre").value = p.costs?.mainOeuvre || "";
+      document.getElementById("logement").value = p.costs?.logement || "";
+      document.getElementById("locationMateriel").value = p.costs?.locationMateriel || "";
+
+      updateLivePreview();
+      fillResults(p);
+      closeSavedProjects();
+      showResults();
+    }
+
+    function deleteSavedProject(index){
+      const projects = getSavedProjects();
+      projects.splice(index,1);
+      saveSavedProjects(projects);
+      renderSavedProjects();
+    }
+
+    window.openSavedProject = openSavedProject;
+    window.deleteSavedProject = deleteSavedProject;
+
+    function closeSavedProjects(){
+      els.savedProjectsModal.classList.remove("show");
+    }
+
+    function showResults(){
+      els.viewForm.classList.add("hidden");
+      els.viewResults.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showForm(){
+      els.viewResults.classList.add("hidden");
+      els.viewForm.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function syncChoiceButtons(){
+      document.querySelectorAll(".choice").forEach(btn => {
+        const group = btn.dataset.group;
+        const value = btn.dataset.value;
+        const current = state[group];
+        btn.classList.toggle("active", current === value);
+
+        if (btn.classList.contains("active")){
+          btn.classList.remove("btn-ghost");
+          btn.classList.add("btn-primary");
+        } else {
+          btn.classList.remove("btn-primary");
+          btn.classList.add("btn-ghost");
+        }
+      });
+    }
+
+    function buildWhatsappText(data){
+      const parts = [];
+      parts.push(`CHANTIER : ${data.nom || "Sans nom"}`);
+      parts.push(`Date : ${data.date}`);
+      parts.push("");
+      parts.push(`SURFACES :`);
+      parts.push(`- Décor moins de 3 m : ${formatNum(data.moins3)} m²`);
+      parts.push(`- Décor plus de 3 m : ${formatNum(data.plus3)} m²`);
+      parts.push(`- Surface totale : ${formatNum(data.surfaceTotale)} m²`);
+      parts.push("");
+      parts.push(`TEMPS :`);
+      parts.push(`- Chantier : ${formatNum(data.tempsChantier)} jours`);
+      parts.push(`- Équivalent chantier : ${formatWeeksDays(data.tempsChantier)}`);
+      if (data.tempsRoute > 0) parts.push(`- Route : ${formatNum(data.tempsRoute)} jours`);
+      parts.push(`- Total : ${formatNum(data.tempsTotal)} jours`);
+      parts.push(`- Équivalent total : ${formatWeeksDays(data.tempsTotal)}`);
+      parts.push(`- Total arrondi : ${formatNum(data.tempsArrondi,0)} jours`);
+      parts.push("");
+      parts.push(`MATÉRIAUX :`);
+      parts.push(`- Acier : ${formatNum(data.quantities.acier)} ml`);
+      parts.push(`- Grillage : ${formatNum(data.quantities.grillage)} m²`);
+      parts.push(`- Béton : ${formatNum(data.quantities.beton)} sacs`);
+      parts.push(`- Baguettes : ${formatNum(data.quantities.baguette,0)} u`);
+      parts.push(`- Agrafes : ${formatNum(data.quantities.agrafe,0)} u`);
+      parts.push(`- Vernis : ${formatNum(data.quantities.vernis)} L`);
+      return parts.join("\n");
+    }
+
+    function openPdfWindow(){
+      if (!state.lastResults) return;
+
+      const data = state.lastResults;
+      const pdfWindow = window.open("", "_blank", "width=1000,height=900");
+      if (!pdfWindow) {
+        alert("Impossible d’ouvrir la fenêtre PDF. Vérifie que le navigateur n’a pas bloqué la fenêtre.");
+        return;
+      }
+
+      const rowRoute = data.tempsRoute > 0
+        ? `<div class="print-row"><span>Temps route</span><strong>${formatNum(data.tempsRoute)} jours</strong></div>`
+        : "";
+
+      pdfWindow.document.write(`
+        <html lang="fr">
+          <head>
+            <meta charset="UTF-8">
+            <title>Calcul ARD - PDF</title>
+            <style>
+              body{margin:0;font-family:Arial,sans-serif;color:#1F2A34;background:#f8f8f8}
+              .toolbar{position:sticky;top:0;background:#ffffff;border-bottom:1px solid #ddd;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;z-index:5}
+              .toolbar h2{margin:0;font-size:18px}
+              .toolbar button{border:none;border-radius:12px;padding:12px 16px;background:#C8752B;color:#fff;font-weight:700;cursor:pointer}
+              .sheet{max-width:900px;margin:24px auto;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:24px}
+              h1{margin:0 0 8px;font-size:28px}
+              .sub{margin:0 0 20px;color:#666;font-size:14px}
+              .print-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+              .print-card{border:1px solid #ddd;border-radius:14px;padding:14px;break-inside:avoid;margin-bottom:18px}
+              .print-card h3{margin:0 0 10px;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:#666}
+              .print-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #eee;font-size:14px}
+              .print-row:last-child{border-bottom:none}
+              .print-total{margin-top:14px;background:#f2f2f2;border-radius:12px;padding:12px;font-size:18px;font-weight:800;display:flex;justify-content:space-between}
+              .weeks{margin-top:8px;font-size:13px;color:#666;font-weight:700}
+              @media print{body{background:#fff}.toolbar{display:none}.sheet{box-shadow:none;margin:0;max-width:none;padding:0}}
+            </style>
+          </head>
+          <body>
+            <div class="toolbar">
+              <h2>Calcul ARD - PDF</h2>
+              <button onclick="window.print()">Imprimer / Enregistrer en PDF</button>
+            </div>
+            <div class="sheet">
+              <h1>Calcul ARD</h1>
+              <p class="sub">Document chantier — ${data.date}</p>
+              <div class="print-grid">
+                <div class="print-card">
+                  <h3>Résumé</h3>
+                  <div class="print-row"><span>Chantier</span><strong>${data.nom || "Chantier sans nom"}</strong></div>
+                  <div class="print-row"><span>Décor moins de 3 m</span><strong>${formatNum(data.moins3)} m²</strong></div>
+                  <div class="print-row"><span>Décor plus de 3 m</span><strong>${formatNum(data.plus3)} m²</strong></div>
+                  <div class="print-row"><span>Surface totale</span><strong>${formatNum(data.surfaceTotale)} m²</strong></div>
+                  <div class="print-row"><span>Qualité</span><strong>${data.qualite === "superieure" ? "Supérieure" : "Moyenne"}</strong></div>
+                  <div class="print-row"><span>Conditions</span><strong>${data.conditions === "difficile" ? "Difficile" : "Normal"}</strong></div>
+                </div>
+                <div class="print-card">
+                  <h3>Temps</h3>
+                  <div class="print-row"><span>Temps chantier</span><strong>${formatNum(data.tempsChantier)} jours</strong></div>
+                  <div class="weeks">${formatWeeksDays(data.tempsChantier)}</div>
+                  ${rowRoute}
+                  <div class="print-row"><span>Temps total</span><strong>${formatNum(data.tempsTotal)} jours</strong></div>
+                  <div class="weeks">${formatWeeksDays(data.tempsTotal)}</div>
+                  <div class="print-total"><span>Total arrondi</span><span>${formatNum(data.tempsArrondi,0)} jours</span></div>
+                </div>
+              </div>
+              <div class="print-card" style="margin-bottom:18px;">
+                <h3>Matériaux</h3>
+                <div class="print-row"><span>Acier 7 mm</span><strong>${formatNum(data.quantities.acier)} ml</strong></div>
+                <div class="print-row"><span>Grillage</span><strong>${formatNum(data.quantities.grillage)} m²</strong></div>
+                <div class="print-row"><span>Béton</span><strong>${formatNum(data.quantities.beton)} sacs</strong></div>
+                <div class="print-row"><span>Baguettes</span><strong>${formatNum(data.quantities.baguette,0)} u</strong></div>
+                <div class="print-row"><span>Agrafes</span><strong>${formatNum(data.quantities.agrafe,0)} u</strong></div>
+                <div class="print-row"><span>Vernis</span><strong>${formatNum(data.quantities.vernis)} L</strong></div>
+                <div class="print-row"><span>Patines</span><strong>Prévoir minimum 4 couleurs</strong></div>
+                <div class="print-total"><span>Total matériaux</span><span>${formatMoney(data.costs.totalMateriaux)}</span></div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+      pdfWindow.document.close();
+    }
+
+    function resetForm(){
+      els.chantierNom.value = "";
+      els.surfaceMoins3.value = 0;
+      els.surfacePlus3.value = 0;
+      els.heuresRoute.value = "";
+      document.getElementById("mainOeuvre").value = "";
+      document.getElementById("logement").value = "";
+      document.getElementById("locationMateriel").value = "";
+      state.qualite = "moyenne";
+      state.conditions = "normal";
+      state.betonManuel = false;
+      syncChoiceButtons();
+      applyDefaultBetonRatio(true);
+      updateLivePreview();
+      showForm();
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    document.querySelectorAll(".choice").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state[btn.dataset.group] = btn.dataset.value;
+        syncChoiceButtons();
+        if (btn.dataset.group === "qualite" && !state.betonManuel){
+          applyDefaultBetonRatio(true);
+        }
+        updateLivePreview();
+      });
+    });
+
+    [els.surfaceMoins3, els.surfacePlus3, els.heuresRoute].forEach(input => {
+      input.addEventListener("input", updateLivePreview);
+    });
+
+    settingInputs.forEach(id => {
+      const input = document.getElementById(id);
+      input.addEventListener("input", () => {
+        if (id === "ratioBeton") state.betonManuel = true;
+        saveSettings();
+      });
+      input.addEventListener("focus", e => e.target.select());
+      input.addEventListener("click", e => e.target.select());
+    });
+
+    ["mainOeuvre","logement","locationMateriel"].forEach(id => {
+      const input = document.getElementById(id);
+      input.addEventListener("focus", e => e.target.select());
+      input.addEventListener("click", e => e.target.select());
+    });
+
+    els.toggleCosts.addEventListener("click", () => {
+      const open = els.costsPanel.classList.toggle("open");
+      els.toggleCostsChevron.textContent = open ? "▴" : "▾";
+    });
+
+    els.btnCalculer.addEventListener("click", () => {
+      const data = computeAll();
+      fillResults(data);
+      saveCurrentProjectIfNamed(data);
+      showResults();
+    });
+
+    els.btnBack.addEventListener("click", showForm);
+    els.btnModifier.addEventListener("click", showForm);
+    els.btnNew.addEventListener("click", resetForm);
+
+    els.btnWhatsapp.addEventListener("click", () => {
+      if (!state.lastResults) return;
+      const text = buildWhatsappText(state.lastResults);
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+    });
+
+    els.btnPdf.addEventListener("click", openPdfWindow);
+
+    els.btnSavedProjects.addEventListener("click", () => {
+      renderSavedProjects();
+      els.savedProjectsModal.classList.add("show");
+    });
+
+    els.btnCloseProjects.addEventListener("click", closeSavedProjects);
+    els.savedProjectsModal.addEventListener("click", (e) => {
+      if (e.target === els.savedProjectsModal) closeSavedProjects();
+    });
+
+    applySettingsToInputs();
+    syncChoiceButtons();
+    applyDefaultBetonRatio(false);
+    updateLivePreview();
+    renderSavedProjects();
+  </script>
+</body>
+</html>
