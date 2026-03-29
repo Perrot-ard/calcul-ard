@@ -959,6 +959,141 @@
       font-size:17px;
     }
 
+    /* ══ MARGE CARD ══ */
+    .marge-card{
+      background:var(--bg3);
+      border:1.5px solid var(--cuivre-dark);
+      border-radius:var(--r-lg);
+      padding:20px;
+      margin-bottom:16px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .marge-card::before{
+      content:'';
+      position:absolute;
+      top:0; left:0;
+      width:4px; height:100%;
+      background:linear-gradient(to bottom, var(--cuivre), var(--cuivre-dark));
+    }
+
+    .marge-preview{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .marge-kpi{
+      background:var(--bg4);
+      border:1px solid var(--border2);
+      border-radius:var(--r);
+      padding:14px 16px;
+    }
+
+    .marge-kpi.highlight{
+      background:linear-gradient(135deg,rgba(168,96,30,.18),rgba(212,129,58,.08));
+      border-color:var(--cuivre-dark);
+    }
+
+    .marge-kpi .mk-label{
+      font-family:var(--font-head);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--text3);
+      margin-bottom:6px;
+    }
+
+    .marge-kpi .mk-value{
+      font-family:var(--font-head);
+      font-size:28px;
+      font-weight:900;
+      color:var(--cuivre);
+      line-height:1;
+    }
+
+    .marge-kpi.highlight .mk-value{
+      font-size:32px;
+    }
+
+    .marge-kpi .mk-sub{
+      font-size:12px;
+      color:var(--text3);
+      margin-top:4px;
+      font-weight:500;
+    }
+
+    /* Prix/m² badge dans résultats */
+    .ppm2-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:var(--bg4);
+      border:1px solid var(--border2);
+      border-radius:8px;
+      padding:4px 10px;
+      font-family:var(--font-head);
+      font-size:14px;
+      font-weight:700;
+      color:var(--text3);
+      margin-top:4px;
+      letter-spacing:.04em;
+    }
+
+    .ppm2-badge span{color:var(--cuivre2)}
+
+    /* Bloc prix de vente résultats */
+    .devis-box{
+      background:linear-gradient(135deg, rgba(168,96,30,.25), rgba(212,129,58,.12));
+      border:1.5px solid var(--cuivre-dark);
+      border-radius:var(--r-lg);
+      padding:20px 22px;
+      margin-top:14px;
+    }
+
+    .devis-box .db-title{
+      font-family:var(--font-head);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--cuivre);
+      margin-bottom:12px;
+    }
+
+    .devis-box .db-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:12px;
+      padding:8px 0;
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .devis-box .db-row:last-child{border-bottom:none}
+
+    .devis-box .db-label{
+      color:var(--text2);
+      font-size:15px;
+      font-weight:500;
+    }
+
+    .devis-box .db-value{
+      font-family:var(--font-head);
+      font-size:22px;
+      font-weight:900;
+      color:var(--cuivre2);
+      white-space:nowrap;
+    }
+
+    .devis-box .db-value.big{
+      font-size:32px;
+      color:var(--cuivre);
+    }
+
     /* ══ HIDDEN ══ */
     .hidden{display:none !important}
 
@@ -1105,6 +1240,30 @@
           <label for="locationMateriel">Location matériel (€)</label>
           <input type="number" step="1" id="locationMateriel" placeholder="—"/>
           <div class="mini-note">Nacelle, échafaudage…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARGE & DEVIS -->
+    <div class="marge-card">
+      <div class="section-label">Marge & devis <span style="text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3)">(optionnel)</span></div>
+
+      <div class="field" id="fMarge" style="max-width:260px">
+        <label for="margePct">Marge souhaitée (%)</label>
+        <input type="number" min="0" step="0.5" id="margePct" placeholder="Ex : 30"/>
+        <div class="help-text">Appliquée sur le total général (matériaux + tous frais).</div>
+      </div>
+
+      <div class="marge-preview" id="margePreview" style="display:none">
+        <div class="marge-kpi">
+          <div class="mk-label">Montant marge</div>
+          <div class="mk-value" id="prevMargeEur">—</div>
+          <div class="mk-sub">€ de marge brute</div>
+        </div>
+        <div class="marge-kpi highlight">
+          <div class="mk-label">Prix de vente</div>
+          <div class="mk-value" id="prevPrixVente">—</div>
+          <div class="mk-sub" id="prevPrixM2">— € / m²</div>
         </div>
       </div>
     </div>
@@ -1331,6 +1490,39 @@
         <span class="rl-label"><strong>Total général</strong></span>
         <span class="rl-value accent" id="sGeneral">0 €</span>
       </div>
+      <div class="r-line">
+        <div>
+          <div class="rl-label">Prix matériaux / m²</div>
+        </div>
+        <span class="rl-value" id="sPrixMatM2">— € / m²</span>
+      </div>
+      <div class="r-line">
+        <div>
+          <div class="rl-label">Coût total / m²</div>
+        </div>
+        <span class="rl-value" id="sPrixGenM2">— € / m²</span>
+      </div>
+
+      <!-- Bloc devis avec marge (masqué si marge = 0) -->
+      <div class="devis-box hidden" id="devisBox">
+        <div class="db-title">📋 Devis — Prix de vente</div>
+        <div class="db-row">
+          <span class="db-label">Total coûts</span>
+          <span class="db-value" id="dTotGen">—</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">Marge (<span id="dMargePct">0</span> %)</span>
+          <span class="db-value" id="dMargeEur">—</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label"><strong>Prix de vente</strong></span>
+          <span class="db-value big" id="dPrixVente">—</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">Prix de vente / m²</span>
+          <span class="db-value" id="dPrixVenteM2">—</span>
+        </div>
+      </div>
     </div>
 
     <div class="muted-note">Matériaux calculés sur ratios saisis · Temps indicatif</div>
@@ -1513,6 +1705,37 @@ function updatePreview(){
   ui.prevWeeks.textContent = fmtWeeks(chan);
   ui.totDays.innerHTML     = `${fmtNum(total)}<span style="font-size:20px;font-weight:700;color:var(--text2);margin-left:8px">j</span>`;
   ui.totWeeks.textContent  = fmtWeeks(total);
+  updateMargePreview();
+}
+
+function updateMargePreview(){
+  // Calcul live de la marge dans le formulaire
+  // On recalcule le totGen à partir des champs actuels sans appeler computeAll
+  const surf   = getSurface();
+  const s      = getSettings();
+  const prod   = productivite();
+
+  const totMat = surf*(s.ratioAcier*s.prixAcier + s.ratioGrillage*s.prixGrillage +
+                       s.ratioBeton*s.prixBeton + s.ratioBaguette*s.prixBaguette +
+                       s.ratioAgrafe*s.prixAgrafe + s.ratioVernis*s.prixVernis);
+  const mo     = toNum($("mainOeuvre").value);
+  const log    = toNum($("logement").value);
+  const locm   = toNum($("locationMateriel").value);
+  const totGen = totMat + mo + log + locm;
+  const pct    = toNum($("margePct").value);
+  const hasM   = pct > 0 && totGen > 0;
+  const preview= $("margePreview");
+
+  preview.style.display = hasM ? "grid" : "none";
+  if(!hasM) return;
+
+  const margeEur   = totGen*(pct/100);
+  const prixVente  = totGen + margeEur;
+  const prixVenteM2= surf>0 ? prixVente/surf : 0;
+
+  $("prevMargeEur").textContent = fmtMoney(margeEur);
+  $("prevPrixVente").textContent= fmtMoney(prixVente);
+  $("prevPrixM2").textContent   = surf>0 ? `${fmtMoney(prixVenteM2)} / m²` : "— / m²";
 }
 
 function computeAll(){
@@ -1549,6 +1772,13 @@ function computeAll(){
   const locm     = toNum($("locationMateriel").value);
   const totGen   = totMat+mo+log+locm;
 
+  const margePct   = toNum($("margePct").value);
+  const margeEur   = totGen * (margePct/100);
+  const prixVente  = totGen + margeEur;
+  const prixMatM2  = surf>0 ? totMat/surf : 0;
+  const prixGenM2  = surf>0 ? totGen/surf : 0;
+  const prixVenteM2= surf>0 ? prixVente/surf : 0;
+
   return {
     nom, date:dateFr(),
     qualite:state.qualite, conditions:state.conditions,
@@ -1556,7 +1786,8 @@ function computeAll(){
     tChan, tRoute, tTotal, tAr,
     qty:{acier:qAcier,grillage:qGrill,beton:qBeton,baguette:qBag,agrafe:qAg,vernis:qVer},
     cost:{acier:cAcier,grillage:cGrill,beton:cBeton,baguette:cBag,agrafe:cAg,vernis:cVer,
-          totMat, mo, log, locm, totGen}
+          totMat, mo, log, locm, totGen,
+          margePct, margeEur, prixVente, prixMatM2, prixGenM2, prixVenteM2}
   };
 }
 
@@ -1716,6 +1947,22 @@ function fillResults(d){
   setRow("rowMO","sMO",d.cost.mo);
   setRow("rowLog","sLog",d.cost.log);
   setRow("rowLocMat","sLocMat",d.cost.locm);
+
+  // Prix au m²
+  const fmtM2 = v => d.surf>0 ? `${fmtMoney(v)} / m²` : "—";
+  $("sPrixMatM2").textContent = fmtM2(d.cost.prixMatM2);
+  $("sPrixGenM2").textContent = fmtM2(d.cost.prixGenM2);
+
+  // Bloc devis (marge)
+  const hasM = d.cost.margePct > 0;
+  $("devisBox").classList.toggle("hidden", !hasM);
+  if(hasM){
+    $("dTotGen").textContent    = fmtMoney(d.cost.totGen);
+    $("dMargePct").textContent  = fmtNum(d.cost.margePct,1);
+    $("dMargeEur").textContent  = fmtMoney(d.cost.margeEur);
+    $("dPrixVente").textContent = fmtMoney(d.cost.prixVente);
+    $("dPrixVenteM2").textContent = fmtM2(d.cost.prixVenteM2);
+  }
 }
 
 /* ════════════════════════════════════════
@@ -1774,9 +2021,10 @@ window.openProject = function(i){
   state.qualite   = p.qualite||"moyenne";
   state.conditions= p.conditions||"normal";
   syncChoices();
-  $("mainOeuvre").value    = p.cost?.mo||"";
-  $("logement").value      = p.cost?.log||"";
+  $("mainOeuvre").value       = p.cost?.mo||"";
+  $("logement").value         = p.cost?.log||"";
   $("locationMateriel").value = p.cost?.locm||"";
+  $("margePct").value         = p.cost?.margePct||"";
   clearAllMsgs();
   updatePreview();
   fillResults(p);
@@ -1826,6 +2074,8 @@ function syncChoices(){
 function resetForm(){
   ui.nom.value=""; ui.moins3.value=0; ui.plus3.value=0; ui.route.value="";
   $("mainOeuvre").value=""; $("logement").value=""; $("locationMateriel").value="";
+  $("margePct").value="";
+  $("margePreview").style.display="none";
   state.qualite="moyenne"; state.conditions="normal"; state.betonManuel=false;
   clearAllMsgs(); syncChoices(); applyBetonRatio(true); updatePreview(); showForm();
 }
@@ -1858,7 +2108,14 @@ function buildWA(d){
   if(d.cost.mo>0)   lines.push(`  Main-d'œuvre: ${fmtMoney(d.cost.mo)}`);
   if(d.cost.log>0)  lines.push(`  Logement    : ${fmtMoney(d.cost.log)}`);
   if(d.cost.locm>0) lines.push(`  Loc. mat.   : ${fmtMoney(d.cost.locm)}`);
-  lines.push(`  TOTAL       : ${fmtMoney(d.cost.totGen)}`);
+  lines.push(`  TOTAL COÛTS : ${fmtMoney(d.cost.totGen)}`);
+  lines.push(`  Coût / m²   : ${fmtMoney(d.cost.prixGenM2)}`);
+  if(d.cost.margePct>0){
+    lines.push(`\nDEVIS (marge ${fmtNum(d.cost.margePct,1)} %) :`);
+    lines.push(`  Marge       : ${fmtMoney(d.cost.margeEur)}`);
+    lines.push(`  ► Prix vente : ${fmtMoney(d.cost.prixVente)}`);
+    lines.push(`  Prix vente/m² : ${fmtMoney(d.cost.prixVenteM2)}`);
+  }
   return lines.join("\n");
 }
 
@@ -1872,6 +2129,16 @@ function openPdf(){
   const rowMO = d.cost.mo>0 ? `<tr><td>Main-d'œuvre</td><td>${fmtMoney(d.cost.mo)}</td></tr>` : "";
   const rowL  = d.cost.log>0 ? `<tr><td>Logement</td><td>${fmtMoney(d.cost.log)}</td></tr>` : "";
   const rowLM = d.cost.locm>0 ? `<tr><td>Location matériel</td><td>${fmtMoney(d.cost.locm)}</td></tr>` : "";
+  const rowDevis = d.cost.margePct>0 ? `
+    <div class="box" style="margin-bottom:20px;border-color:#D4813A;">
+      <h3 style="color:#D4813A">Devis — Prix de vente (marge ${fmtNum(d.cost.margePct,1)} %)</h3>
+      <table>
+        <tr><td>Total coûts</td><td>${fmtMoney(d.cost.totGen)}</td></tr>
+        <tr><td>Marge (${fmtNum(d.cost.margePct,1)} %)</td><td>${fmtMoney(d.cost.margeEur)}</td></tr>
+        <tr class="total-row"><td>Prix de vente</td><td>${fmtMoney(d.cost.prixVente)}</td></tr>
+        <tr><td>Prix de vente / m²</td><td>${fmtMoney(d.cost.prixVenteM2)}</td></tr>
+      </table>
+    </div>` : "";
 
   win.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
   <title>Calcul ARD — ${escHtml(d.nom||"Chantier")}</title>
@@ -1945,8 +2212,11 @@ function openPdf(){
         <tr><td>Total matériaux</td><td>${fmtMoney(d.cost.totMat)}</td></tr>
         ${rowMO}${rowL}${rowLM}
         <tr class="total-row"><td>Total général</td><td>${fmtMoney(d.cost.totGen)}</td></tr>
+        <tr><td>Coût matériaux / m²</td><td>${fmtMoney(d.cost.prixMatM2)}</td></tr>
+        <tr><td>Coût total / m²</td><td>${fmtMoney(d.cost.prixGenM2)}</td></tr>
       </table>
     </div>
+    ${rowDevis}
     <div class="final-box">
       <div class="fl">Total arrondi</div>
       <div><span class="fv">${fmtNum(d.tAr,0)}</span><span class="fu">jours</span></div>
@@ -1982,10 +2252,15 @@ document.querySelectorAll(".choice").forEach(btn=>{
 ["mainOeuvre","logement","locationMateriel"].forEach(id=>{
   const el=$(id);
   const fmap={mainOeuvre:"fMO",logement:"fLog",locationMateriel:"fLocMat"};
-  el.addEventListener("input",()=>{ clearMsg(fmap[id],el); ui.formAlert.classList.remove("show") });
+  el.addEventListener("input",()=>{ clearMsg(fmap[id],el); ui.formAlert.classList.remove("show"); updateMargePreview(); });
   el.addEventListener("focus",e=>e.target.select());
   el.addEventListener("click",e=>e.target.select());
 });
+
+// Marge
+$("margePct").addEventListener("input", updateMargePreview);
+$("margePct").addEventListener("focus", e=>e.target.select());
+$("margePct").addEventListener("click", e=>e.target.select());
 
 // Nom
 ui.nom.addEventListener("input",()=>clearMsg("fNom",ui.nom));
