@@ -1,1553 +1,2056 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Calcul ARD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
+    /* ══════════════════════════════════════════
+       DESIGN SYSTEM — INDUSTRIEL / PRO CHANTIER
+       Dark base · Cuivre vif · Barlow Condensed
+    ══════════════════════════════════════════ */
     :root{
-      --cuivre:#C8752B;
-      --beige:#F7F5F2;
-      --beige-pierre:#E8DCC9;
-      --bleu:#D7DFE2;
-      --texte:#1F2A34;
-      --muted:#6B7280;
-      --bord:#E5DED4;
-      --shadow:0 8px 24px rgba(31,42,52,.08);
-      --radius:18px;
-      --green:#2D7A46;
-      --danger:#A33A2A;
+      --bg:        #131719;
+      --bg2:       #1B1F22;
+      --bg3:       #22282C;
+      --bg4:       #2A3036;
+      --border:    #353D44;
+      --border2:   #404950;
+      --cuivre:    #D4813A;
+      --cuivre2:   #E8975A;
+      --cuivre-dark:#A8601E;
+      --text:      #F0EDE8;
+      --text2:     #B8B0A6;
+      --text3:     #7A7470;
+      --green:     #4CAF72;
+      --green-bg:  #0D2118;
+      --red:       #E05252;
+      --red-bg:    #200F0F;
+      --red-border:#5C1F1F;
+      --warn:      #E8C04A;
+      --warn-bg:   #1E1800;
+      --warn-border:#5C4A0A;
+      --blue:      #5BA3D4;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,.4);
+      --shadow:    0 6px 24px rgba(0,0,0,.5);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,.6);
+      --r:         12px;
+      --r-lg:      18px;
+      --font-head: 'Barlow Condensed', sans-serif;
+      --font-body: 'Barlow', sans-serif;
     }
 
-    *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      padding:0;
-      background:var(--beige);
-      color:var(--texte);
-      font-family:Arial, sans-serif;
+    *, *::before, *::after{box-sizing:border-box; margin:0; padding:0}
+
+    html{scroll-behavior:smooth}
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:var(--font-body);
+      font-size:16px;
+      line-height:1.5;
+      min-height:100vh;
+      /* subtle noise texture */
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
     }
-    body{min-height:100vh}
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:var(--bg2)}
+    ::-webkit-scrollbar-thumb{background:var(--border2); border-radius:3px}
 
     .app{
-      max-width:940px;
+      max-width:960px;
       margin:0 auto;
-      padding:20px 16px 180px;
+      padding:24px 16px 200px;
     }
 
+    /* ══ TOPBAR ══ */
     .topbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom:18px;
+      gap:16px;
+      margin-bottom:28px;
+      padding-bottom:24px;
+      border-bottom:1px solid var(--border);
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap:12px;
-      min-width:0;
+      gap:16px;
     }
 
     .logo-box{
-      width:68px;
-      height:68px;
-      border-radius:16px;
-      background:#fff;
-      border:1px solid var(--bord);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      flex:0 0 auto;
-      padding:6px;
+      width:60px; height:60px;
+      border-radius:var(--r);
+      background:var(--bg3);
+      border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden; flex:0 0 auto; padding:6px;
     }
 
-    .logo-box img{
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      display:block;
-    }
-
+    .logo-box img{width:100%; height:100%; object-fit:contain; display:block}
     .logo-fallback{
-      font-weight:800;
+      font-family:var(--font-head);
+      font-weight:900;
       color:var(--cuivre);
-      letter-spacing:.06em;
-      font-size:16px;
+      font-size:22px;
+      letter-spacing:.08em;
       display:none;
     }
 
-    .title-wrap h1{
-      margin:0;
-      font-size:34px;
+    .brand-text h1{
+      font-family:var(--font-head);
+      font-weight:900;
+      font-size:36px;
       line-height:1;
-      font-weight:800;
+      letter-spacing:.04em;
+      color:var(--text);
     }
 
-    .title-wrap p{
-      margin:6px 0 0;
-      color:var(--muted);
+    .brand-text h1 span{color:var(--cuivre)}
+
+    .brand-text p{
+      color:var(--text3);
       font-size:13px;
+      font-weight:500;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      margin-top:4px;
     }
 
-    .top-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+    .top-actions{display:flex; gap:10px; flex-wrap:wrap}
 
+    /* ══ BUTTONS ══ */
     .btn{
-      border:none;
-      border-radius:16px;
-      padding:14px 18px;
+      font-family:var(--font-head);
       font-weight:700;
-      font-size:16px;
+      font-size:17px;
+      letter-spacing:.04em;
+      border:none;
+      border-radius:var(--r);
+      padding:12px 20px;
       cursor:pointer;
-      transition:.18s ease;
-      text-decoration:none;
+      transition:all .15s ease;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      gap:10px;
-      box-shadow:none;
-    }
-
-    .btn:active{transform:translateY(1px)}
-    .btn-primary{background:var(--cuivre); color:#fff;}
-    .btn-ghost{background:transparent; color:var(--cuivre); border:2px solid var(--cuivre);}
-    .btn-soft{background:var(--beige-pierre); color:var(--cuivre); border:2px solid transparent;}
-    .btn-muted{background:#fff; color:var(--texte); border:1px solid var(--bord);}
-    .btn-danger{background:#fff; color:var(--danger); border:1px solid #E7C5BF;}
-    .btn-compact{min-height:52px; padding:12px 14px; border-radius:14px; font-size:15px;}
-
-    .card{
-      background:#fff;
-      border:1px solid rgba(31,42,52,.06);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:18px;
-      margin-bottom:18px;
-    }
-
-    .card-muted{background:var(--beige-pierre); border:none;}
-    .card-blue{background:var(--bleu); border:none;}
-
-    .section-title{
-      margin:8px 0 14px;
-      font-size:15px;
-      font-weight:800;
-      letter-spacing:.18em;
-      color:#707884;
+      gap:8px;
       text-transform:uppercase;
+      white-space:nowrap;
     }
 
-    .grid-2{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
+    .btn:active{transform:scale(.97)}
+
+    .btn-primary{
+      background:var(--cuivre);
+      color:#fff;
+      box-shadow:0 4px 16px rgba(212,129,58,.3);
+    }
+    .btn-primary:hover{background:var(--cuivre2); box-shadow:0 6px 20px rgba(212,129,58,.45)}
+
+    .btn-ghost{
+      background:transparent;
+      color:var(--cuivre);
+      border:1.5px solid var(--cuivre);
+    }
+    .btn-ghost:hover{background:rgba(212,129,58,.08)}
+
+    .btn-dim{
+      background:var(--bg3);
+      color:var(--text2);
+      border:1px solid var(--border);
+    }
+    .btn-dim:hover{background:var(--bg4); color:var(--text)}
+
+    .btn-danger{
+      background:transparent;
+      color:var(--red);
+      border:1.5px solid var(--red-border);
+    }
+    .btn-danger:hover{background:var(--red-bg)}
+
+    .btn-sm{padding:9px 14px; font-size:15px; border-radius:10px}
+
+    .btn:disabled{opacity:.35; cursor:not-allowed; transform:none !important; box-shadow:none !important}
+
+    /* ══ SECTION LABEL ══ */
+    .section-label{
+      font-family:var(--font-head);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+      color:var(--text3);
+      margin:0 0 14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .section-label::after{
+      content:'';
+      flex:1;
+      height:1px;
+      background:var(--border);
     }
 
-    .field{margin-bottom:16px;}
+    /* ══ CARD ══ */
+    .card{
+      background:var(--bg2);
+      border:1px solid var(--border);
+      border-radius:var(--r-lg);
+      padding:22px;
+      margin-bottom:16px;
+      box-shadow:var(--shadow-sm);
+    }
+
+    .card-accent{
+      border-color:var(--cuivre-dark);
+      background:linear-gradient(135deg, var(--bg2) 0%, rgba(168,96,30,.08) 100%);
+    }
+
+    .card-result{
+      background:var(--bg3);
+      border-color:var(--border2);
+    }
+
+    /* ══ FIELDS ══ */
+    .field{margin-bottom:18px}
 
     .field label{
       display:block;
-      margin-bottom:10px;
-      font-size:15px;
+      font-family:var(--font-head);
+      font-size:14px;
       font-weight:700;
-      color:#5b6470;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--text3);
+      margin-bottom:8px;
     }
 
     input[type="text"],
     input[type="number"]{
       width:100%;
-      border:none;
+      background:var(--bg3);
+      border:1.5px solid var(--border);
+      border-radius:var(--r);
+      padding:14px 16px;
+      font-family:var(--font-body);
+      font-size:17px;
+      font-weight:500;
+      color:var(--text);
       outline:none;
-      background:#fff;
-      border:1px solid var(--bord);
-      border-radius:18px;
-      padding:18px 16px;
-      font-size:18px;
-      color:var(--texte);
+      transition:border-color .2s, box-shadow .2s, background .2s;
       appearance:textfield;
       -moz-appearance:textfield;
     }
 
-    input.large-number{
-      font-size:54px;
-      font-weight:800;
-      padding:22px 18px;
-      line-height:1.1;
+    input[type="text"]:focus,
+    input[type="number"]:focus{
+      border-color:var(--cuivre);
+      background:var(--bg4);
+      box-shadow:0 0 0 3px rgba(212,129,58,.15);
     }
 
-    .field.beige input{
-      background:var(--beige-pierre);
-      border-color:transparent;
+    input.num-xl{
+      font-family:var(--font-head);
+      font-size:56px;
+      font-weight:900;
+      padding:18px 18px;
+      line-height:1;
+      letter-spacing:-.01em;
     }
 
-    .help{
+    input::placeholder{color:var(--text3)}
+
+    /* Validation states */
+    input.is-error{
+      border-color:var(--red) !important;
+      background:var(--red-bg) !important;
+      box-shadow:0 0 0 3px rgba(224,82,82,.12) !important;
+    }
+    input.is-warn{
+      border-color:var(--warn) !important;
+      background:var(--warn-bg) !important;
+      box-shadow:0 0 0 3px rgba(232,192,74,.1) !important;
+    }
+    input.is-ok{
+      border-color:var(--green) !important;
+      box-shadow:0 0 0 3px rgba(76,175,114,.08) !important;
+    }
+
+    .field-msg{
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
       margin-top:8px;
-      color:#8A919B;
+      padding:9px 12px;
+      border-radius:8px;
       font-size:14px;
+      font-weight:600;
+      line-height:1.4;
+      animation:slideDown .18s ease;
+    }
+    .field-msg.error{background:var(--red-bg); color:var(--red); border:1px solid var(--red-border)}
+    .field-msg.warn{background:var(--warn-bg); color:var(--warn); border:1px solid var(--warn-border)}
+    .field-msg.info{background:var(--green-bg); color:var(--green); border:1px solid #1E4A30}
+
+    @keyframes slideDown{
+      from{opacity:0; transform:translateY(-4px)}
+      to{opacity:1; transform:none}
+    }
+
+    .help-text{
+      margin-top:8px;
+      font-size:13px;
+      color:var(--text3);
       line-height:1.5;
     }
 
-    .mini-note{
-      color:#8C939D;
-      font-size:13px;
-      line-height:1.45;
-      margin-top:6px;
-    }
+    /* ══ GRID ══ */
+    .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+    .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px}
 
+    /* ══ CHOICE BUTTONS ══ */
     .choices{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin-bottom:12px;
+      gap:12px;
+      margin-bottom:4px;
     }
 
     .choice{
-      min-height:84px;
-      font-size:18px;
-      border-radius:18px;
+      padding:16px 12px;
+      font-family:var(--font-head);
+      font-size:20px;
+      font-weight:700;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      border-radius:var(--r);
+      border:1.5px solid var(--border);
+      background:var(--bg3);
+      color:var(--text2);
+      cursor:pointer;
+      transition:all .15s ease;
+    }
+
+    .choice:hover:not(.active){
+      border-color:var(--border2);
+      color:var(--text);
+      background:var(--bg4);
     }
 
     .choice.active{
       background:var(--cuivre);
       color:#fff;
       border-color:var(--cuivre);
+      box-shadow:0 4px 16px rgba(212,129,58,.3);
     }
 
-    .kpi-inline{
+    /* ══ KPI ROW ══ */
+    .kpi-row{
       display:flex;
-      justify-content:space-between;
-      align-items:center;
       gap:12px;
-      background:var(--beige-pierre);
-      border-radius:18px;
-      padding:18px 20px;
-      margin-bottom:18px;
+      margin-bottom:16px;
     }
 
-    .kpi-inline .label{
-      color:#6A717C;
+    .kpi{
+      flex:1;
+      background:var(--bg3);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      padding:14px 16px;
+    }
+
+    .kpi .kpi-label{
+      font-family:var(--font-head);
+      font-size:12px;
       font-weight:700;
-      font-size:16px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--text3);
+      margin-bottom:6px;
     }
 
-    .kpi-inline .value{
+    .kpi .kpi-value{
+      font-family:var(--font-head);
+      font-size:34px;
+      font-weight:900;
       color:var(--cuivre);
-      font-size:32px;
-      font-weight:800;
+      line-height:1;
     }
 
-    .preview-time{
-      border:2px solid var(--cuivre);
-      border-radius:20px;
-      padding:18px 20px;
+    .kpi .kpi-unit{
+      font-size:16px;
+      font-weight:600;
+      color:var(--text3);
+      margin-left:4px;
+    }
+
+    .kpi .kpi-sub{
+      font-size:13px;
+      font-weight:500;
+      color:var(--text3);
+      margin-top:4px;
+    }
+
+    /* ══ PREVIEW TEMPS ══ */
+    .time-preview{
+      background:var(--bg3);
+      border:1.5px solid var(--cuivre-dark);
+      border-radius:var(--r-lg);
+      padding:20px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:center;
+      gap:16px;
+      margin-bottom:8px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .time-preview::before{
+      content:'';
+      position:absolute;
+      top:0; left:0;
+      width:4px; height:100%;
+      background:var(--cuivre);
+    }
+
+    .time-preview .tp-label{
+      font-family:var(--font-head);
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--text3);
+      margin-bottom:4px;
+    }
+
+    .time-preview .tp-sub{
+      font-size:13px;
+      font-weight:500;
+      color:var(--text3);
+      margin-top:6px;
+    }
+
+    .time-preview .tp-big{
+      font-family:var(--font-head);
+      font-size:64px;
+      font-weight:900;
+      color:var(--cuivre);
+      line-height:1;
+      text-align:right;
+    }
+
+    .time-preview .tp-unit{
+      font-size:20px;
+      font-weight:700;
+      color:var(--text2);
+      text-align:right;
+      margin-top:2px;
+    }
+
+    /* ══ TOTAL BOX ══ */
+    .total-preview{
+      background:var(--bg4);
+      border:1px solid var(--border2);
+      border-radius:var(--r);
+      padding:16px 20px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
-      background:#fff8f1;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .total-preview .tp2-label{
+      font-family:var(--font-head);
+      font-size:14px;
+      font-weight:700;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      color:var(--text3);
+    }
+
+    .total-preview .tp2-sub{
+      font-size:13px;
+      color:var(--text3);
+      margin-top:3px;
+    }
+
+    .total-preview .tp2-value{
+      font-family:var(--font-head);
+      font-size:44px;
+      font-weight:900;
+      color:var(--cuivre);
+      white-space:nowrap;
+    }
+
+    /* ══ FRAIS CARD ══ */
+    .frais-card{
+      background:var(--bg3);
+      border:1px solid var(--border);
+      border-radius:var(--r-lg);
+      padding:20px;
+      margin-bottom:16px;
+    }
+
+    /* ══ ACCORDÉON ══ */
+    .accordion-btn{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 18px;
+      background:var(--bg3);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      color:var(--text2);
+      font-family:var(--font-head);
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      cursor:pointer;
+      transition:all .15s;
       margin-bottom:12px;
     }
 
-    .preview-time .big{
-      font-size:44px;
-      font-weight:800;
+    .accordion-btn:hover{
+      background:var(--bg4);
+      color:var(--text);
+      border-color:var(--border2);
+    }
+
+    .accordion-chevron{
+      transition:transform .2s ease;
       color:var(--cuivre);
-      line-height:1;
-      white-space:nowrap;
-    }
-
-    .preview-time .small{
-      font-size:17px;
-      font-weight:800;
-      line-height:1.3;
-    }
-
-    .preview-sub{
-      margin-top:6px;
-      color:#6A717C;
-      font-size:14px;
-      font-weight:700;
-      line-height:1.45;
-    }
-
-    .live-total-box{
-      background:var(--beige-pierre);
-      border-radius:20px;
-      padding:18px 20px;
-      margin-bottom:18px;
-      border:2px solid transparent;
-    }
-
-    .live-total-box .top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:14px;
-    }
-
-    .live-total-box .label{
-      font-size:18px;
-      font-weight:800;
-      color:var(--texte);
-      line-height:1.25;
-    }
-
-    .live-total-box .value{
-      font-size:38px;
-      font-weight:800;
-      color:var(--cuivre);
-      white-space:nowrap;
-    }
-
-    .live-total-box .sub{
-      margin-top:8px;
-      color:#6A717C;
-      font-size:14px;
-      font-weight:700;
-      line-height:1.45;
-    }
-
-    .calc-btn{
-      width:100%;
-      min-height:88px;
-      font-size:24px;
-      border-radius:22px;
-      margin-top:10px;
-    }
-
-    .accordion-toggle{
-      width:100%;
-      justify-content:space-between;
-      padding:18px 20px;
       font-size:20px;
-      background:var(--beige-pierre);
-      color:var(--texte);
-      border:1px solid transparent;
-      margin-bottom:14px;
     }
+
+    .accordion-chevron.open{transform:rotate(180deg)}
 
     .accordion-body{
       display:none;
+    }
+    .accordion-body.open{
+      display:block;
       animation:fadeIn .2s ease;
     }
-
-    .accordion-body.open{display:block}
 
     @keyframes fadeIn{
       from{opacity:0; transform:translateY(6px)}
       to{opacity:1; transform:none}
     }
 
-    .annexe-layout{
-      display:grid;
-      gap:16px;
-    }
+    /* ══ ANNEX CARDS ══ */
+    .annexe-grid{display:grid; gap:14px}
 
     .annexe-card{
-      background:#fff;
-      border:1px solid rgba(31,42,52,.08);
-      border-radius:20px;
+      background:var(--bg3);
+      border:1px solid var(--border);
+      border-radius:var(--r-lg);
       padding:18px;
-      box-shadow:0 4px 16px rgba(31,42,52,.04);
     }
 
-    .annexe-card-title{
-      margin:0 0 14px;
-      font-size:15px;
-      font-weight:800;
-      letter-spacing:.16em;
-      color:#707884;
+    .annexe-title{
+      font-family:var(--font-head);
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.18em;
       text-transform:uppercase;
+      color:var(--text3);
+      margin-bottom:14px;
+      padding-bottom:10px;
+      border-bottom:1px solid var(--border);
     }
 
-    .results-header{
+    .mini-note{
+      font-size:13px;
+      color:var(--text3);
+      line-height:1.5;
+      margin-top:6px;
+    }
+
+    /* ══ CALC BUTTON ══ */
+    .calc-btn{
+      width:100%;
+      padding:22px 24px;
+      font-size:24px;
+      border-radius:var(--r-lg);
+      margin-top:8px;
+      letter-spacing:.08em;
+      box-shadow:0 8px 24px rgba(212,129,58,.35);
+    }
+
+    /* ══ FORM ALERT ══ */
+    .form-alert{
+      display:none;
+      background:var(--red-bg);
+      border:1.5px solid var(--red-border);
+      border-radius:var(--r);
+      padding:16px 18px;
+      margin-bottom:16px;
+    }
+    .form-alert.show{
+      display:block;
+      animation:slideDown .2s ease;
+    }
+    .form-alert-title{
+      font-family:var(--font-head);
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      color:var(--red);
+      margin-bottom:10px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .form-alert ul{
+      padding-left:18px;
+      color:#E07070;
+      font-size:14px;
+      font-weight:500;
+      line-height:1.7;
+    }
+
+    /* ══ SHAKE ══ */
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      15%{transform:translateX(-8px)}
+      30%{transform:translateX(8px)}
+      45%{transform:translateX(-6px)}
+      60%{transform:translateX(6px)}
+      75%{transform:translateX(-3px)}
+      90%{transform:translateX(3px)}
+    }
+    .shake{animation:shake .4s ease}
+
+    /* ══ SAVED MSG ══ */
+    .saved-tag{
+      display:none;
+      align-items:center;
+      gap:6px;
+      margin-top:8px;
+      font-size:13px;
+      font-weight:700;
+      color:var(--green);
+      letter-spacing:.06em;
+    }
+    .saved-tag.show{display:flex}
+
+    /* ══════════════════════════════
+       RÉSULTATS
+    ══════════════════════════════ */
+    .results-topbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:14px;
-      margin-bottom:16px;
+      margin-bottom:20px;
     }
 
-    .back-link{
+    .back-btn{
+      font-family:var(--font-head);
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:.06em;
       color:var(--cuivre);
       background:none;
       border:none;
-      padding:0;
-      font-size:18px;
-      font-weight:700;
       cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:0;
+      text-transform:uppercase;
     }
 
-    .results-title{
-      margin:0;
-      font-size:42px;
-      font-weight:800;
+    .back-btn:hover{color:var(--cuivre2)}
+
+    .results-heading{
+      font-family:var(--font-head);
+      font-size:48px;
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
       line-height:1;
+      margin-bottom:4px;
     }
 
-    .saved-msg{
-      display:none;
-      margin:10px 0 0;
-      font-size:14px;
-      color:var(--green);
+    .results-chantier{
+      font-family:var(--font-head);
+      font-size:22px;
       font-weight:700;
+      color:var(--cuivre);
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-bottom:24px;
     }
 
-    .saved-msg.show{display:block}
-
-    .line-item{
+    /* Ligne de résultat */
+    .r-line{
       display:flex;
       justify-content:space-between;
-      align-items:flex-start;
-      gap:16px;
-      padding:10px 0;
-      border-bottom:1px solid #E9EDF0;
-      font-size:18px;
+      align-items:center;
+      gap:14px;
+      padding:12px 0;
+      border-bottom:1px solid var(--border);
+      font-size:17px;
     }
+    .r-line:last-child{border-bottom:none}
 
-    .line-item:last-child{border-bottom:none}
+    .r-line .rl-label{color:var(--text2); font-weight:500}
 
-    .line-item .label{
-      color:#5F6772;
-    }
-
-    .line-item .value{
+    .r-line .rl-value{
+      font-family:var(--font-head);
       font-weight:800;
+      font-size:20px;
       text-align:right;
       white-space:nowrap;
     }
 
-    .line-item strong.cuivre{
-      color:var(--cuivre);
-      font-size:28px;
+    .rl-value.accent{color:var(--cuivre); font-size:28px}
+
+    .r-sub{
+      font-size:13px;
+      color:var(--text3);
+      font-weight:500;
+      margin-top:2px;
+      font-family:var(--font-body);
     }
 
-    .weeks-row{
-      margin-top:10px;
-      font-size:15px;
-      color:#6A717C;
-      font-weight:700;
-      line-height:1.45;
-    }
-
-    .total-box{
-      background:var(--cuivre);
-      color:#fff;
-      border-radius:24px;
-      padding:26px 22px;
-      margin-top:18px;
+    /* Total final */
+    .result-total-box{
+      background:linear-gradient(135deg, var(--cuivre-dark), var(--cuivre));
+      border-radius:var(--r-lg);
+      padding:28px 24px;
       text-align:center;
+      margin-top:16px;
+      box-shadow:0 8px 32px rgba(212,129,58,.4);
+      position:relative;
+      overflow:hidden;
     }
 
-    .total-box .over{
-      font-size:16px;
-      letter-spacing:.12em;
+    .result-total-box::before{
+      content:'';
+      position:absolute;
+      top:-30px; right:-30px;
+      width:120px; height:120px;
+      background:rgba(255,255,255,.06);
+      border-radius:50%;
+    }
+
+    .result-total-box::after{
+      content:'';
+      position:absolute;
+      bottom:-40px; left:-20px;
+      width:160px; height:160px;
+      background:rgba(0,0,0,.08);
+      border-radius:50%;
+    }
+
+    .result-total-box .rtb-label{
+      font-family:var(--font-head);
+      font-size:14px;
+      font-weight:700;
+      letter-spacing:.2em;
       text-transform:uppercase;
-      opacity:.95;
+      opacity:.9;
       margin-bottom:8px;
     }
 
-    .total-box .big{
-      font-size:64px;
-      font-weight:800;
+    .result-total-box .rtb-value{
+      font-family:var(--font-head);
+      font-size:80px;
+      font-weight:900;
       line-height:1;
+      letter-spacing:-.02em;
     }
 
-    .total-box .unit{
+    .result-total-box .rtb-unit{
+      font-family:var(--font-head);
       font-size:28px;
       font-weight:700;
-      margin-left:8px;
+      margin-left:10px;
+      opacity:.85;
     }
 
-    .muted-center{
-      text-align:center;
-      color:#8A919B;
-      margin:22px 0;
-      line-height:1.45;
-    }
-
+    /* ══ BOTTOM ACTIONS ══ */
     .bottom-actions{
       display:flex;
       gap:12px;
       flex-wrap:wrap;
-      margin-top:18px;
-      padding-bottom:130px;
+      margin-top:20px;
+      padding-bottom:160px;
     }
 
     .bottom-actions .btn{
-      min-width:160px;
-      min-height:56px;
       flex:1 1 180px;
+      min-height:56px;
       font-size:18px;
     }
 
-    .hidden{display:none !important}
+    .muted-note{
+      text-align:center;
+      color:var(--text3);
+      font-size:13px;
+      line-height:1.5;
+      margin:16px 0;
+    }
 
+    /* ══ MODAL CHANTIERS ══ */
     .modal-backdrop{
       position:fixed;
       inset:0;
-      background:rgba(20,26,34,.42);
+      background:rgba(0,0,0,.7);
       display:none;
       align-items:flex-end;
       justify-content:center;
-      z-index:50;
-      padding:14px;
+      z-index:60;
+      padding:12px;
+      backdrop-filter:blur(4px);
     }
-
     .modal-backdrop.show{display:flex}
 
     .modal{
-      width:min(900px,100%);
-      max-height:85vh;
+      width:min(960px, 100%);
+      max-height:82vh;
       overflow:auto;
-      background:#fff;
-      border-radius:24px 24px 16px 16px;
-      box-shadow:0 20px 50px rgba(0,0,0,.25);
-      padding:20px;
+      background:var(--bg2);
+      border:1px solid var(--border2);
+      border-radius:20px 20px 14px 14px;
+      box-shadow:var(--shadow-lg);
+      padding:22px;
+      animation:slideUp .25s ease;
+    }
+
+    @keyframes slideUp{
+      from{transform:translateY(20px); opacity:0}
+      to{transform:none; opacity:1}
     }
 
     .modal-head{
       display:flex;
       justify-content:space-between;
       align-items:center;
-      gap:10px;
-      margin-bottom:16px;
+      gap:12px;
+      margin-bottom:18px;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--border);
     }
 
     .modal-head h3{
-      margin:0;
-      font-size:26px;
-      font-weight:800;
+      font-family:var(--font-head);
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
     }
 
-    .saved-project{
-      border:1px solid var(--bord);
-      border-radius:18px;
-      padding:14px;
-      margin-bottom:12px;
+    .saved-item{
+      background:var(--bg3);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      padding:16px;
+      margin-bottom:10px;
       display:flex;
       justify-content:space-between;
       gap:16px;
-      align-items:flex-start;
+      align-items:center;
+      transition:border-color .15s;
     }
 
-    .saved-project .meta{
-      color:#7C848E;
-      font-size:14px;
-      line-height:1.4;
-      margin-top:6px;
-    }
+    .saved-item:hover{border-color:var(--border2)}
 
-    .saved-project .name{
+    .saved-item .si-name{
+      font-family:var(--font-head);
+      font-size:20px;
       font-weight:800;
-      font-size:18px;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      color:var(--text);
     }
 
-    .saved-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
+    .saved-item .si-meta{
+      font-size:13px;
+      color:var(--text3);
+      font-weight:500;
+      line-height:1.5;
+      margin-top:4px;
     }
+
+    .saved-item-actions{display:flex; gap:8px}
 
     .empty-state{
-      padding:18px;
-      background:#FAFBFC;
-      border:1px dashed #D6DDE3;
-      border-radius:18px;
-      color:#7B838D;
+      padding:24px;
+      background:var(--bg3);
+      border:1px dashed var(--border2);
+      border-radius:var(--r);
+      color:var(--text3);
       text-align:center;
+      font-family:var(--font-head);
+      font-size:18px;
+      letter-spacing:.06em;
     }
 
-    @media (max-width: 740px){
-      .title-wrap h1{font-size:28px}
+    /* ══ CONFIRM MODAL ══ */
+    .confirm-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.75);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:80;
+      padding:16px;
+      backdrop-filter:blur(6px);
+    }
+    .confirm-backdrop.show{display:flex}
+
+    .confirm-box{
+      background:var(--bg2);
+      border:1px solid var(--red-border);
+      border-radius:var(--r-lg);
+      padding:32px 28px;
+      max-width:400px;
+      width:100%;
+      text-align:center;
+      box-shadow:var(--shadow-lg);
+      animation:slideDown .2s ease;
+    }
+
+    .confirm-box .cb-icon{
+      font-size:48px;
+      margin-bottom:14px;
+    }
+
+    .confirm-box h3{
+      font-family:var(--font-head);
+      font-size:26px;
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+
+    .confirm-box p{
+      color:var(--text3);
+      font-size:15px;
+      line-height:1.5;
+      margin-bottom:24px;
+    }
+
+    .confirm-box .cb-actions{
+      display:flex;
+      gap:12px;
+    }
+
+    .confirm-box .btn{
+      flex:1;
+      min-height:50px;
+      font-size:17px;
+    }
+
+    /* ══ HIDDEN ══ */
+    .hidden{display:none !important}
+
+    /* ══ RESPONSIVE ══ */
+    @media(max-width:740px){
+      .topbar{flex-direction:column; align-items:flex-start}
+      .top-actions{width:100%}
       .grid-2{grid-template-columns:1fr}
-      .topbar{align-items:flex-start; flex-direction:column}
-      .top-actions{width:100%; justify-content:flex-start}
-      .results-title{font-size:34px}
-      .preview-time,
-      .live-total-box .top{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-      .preview-time .big,
-      .live-total-box .value{font-size:40px}
-      .line-item{font-size:17px}
-      .bottom-actions{gap:10px}
-      .bottom-actions .btn{
-        min-width:unset;
-        flex:1 1 calc(50% - 10px);
-      }
+      .grid-3{grid-template-columns:1fr 1fr}
+      .kpi-row{flex-wrap:wrap}
+      .kpi{min-width:calc(50% - 6px)}
+      .time-preview{grid-template-columns:1fr}
+      .time-preview .tp-big{text-align:left; font-size:52px}
+      .total-preview{flex-direction:column; align-items:flex-start}
+      .results-heading{font-size:36px}
+      .result-total-box .rtb-value{font-size:60px}
+      .bottom-actions .btn{flex:1 1 calc(50% - 6px)}
+    }
+
+    @media(max-width:480px){
+      .grid-3{grid-template-columns:1fr}
+      .choices{grid-template-columns:1fr 1fr}
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div id="viewForm">
-      <div class="topbar">
-        <div class="brand">
-          <div class="logo-box">
-            <img id="logoImg" src="logo site.jpg" alt="Logo ARD Academy" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='block';" />
-            <div id="logoFallback" class="logo-fallback">ARD</div>
-          </div>
-          <div class="title-wrap">
-            <h1>Calcul ARD</h1>
-            <p>Outil chantier rapide et chiffrage optionnel</p>
-          </div>
-        </div>
+<div class="app">
 
-        <div class="top-actions">
-          <button class="btn btn-soft" id="btnSavedProjects">📁 Mes chantiers</button>
+  <!-- ══════════════════════════════════════
+       VUE FORMULAIRE
+  ══════════════════════════════════════ -->
+  <div id="viewForm">
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo-box">
+          <img src="logo site.jpg" alt="ARD" onerror="this.style.display='none';document.getElementById('logoFb').style.display='block'"/>
+          <div id="logoFb" class="logo-fallback">ARD</div>
+        </div>
+        <div class="brand-text">
+          <h1>Calcul <span>ARD</span></h1>
+          <p>Outil de chiffrage chantier</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-dim" id="btnSaved">📁 Mes chantiers</button>
+      </div>
+    </div>
+
+    <!-- Bandeau erreurs global -->
+    <div class="form-alert" id="formAlert">
+      <div class="form-alert-title">⚠ Corrections requises</div>
+      <ul id="formAlertList"></ul>
+    </div>
+
+    <div class="card card-accent">
+      <div class="section-label">Chantier</div>
+
+      <div class="field" id="fNom">
+        <label for="chantierNom">Nom du chantier</label>
+        <input type="text" id="chantierNom" placeholder="Ex : Villa Bretagne · Aquarium Berlin · Client X"/>
+        <div class="saved-tag" id="savedTag">✓ Enregistré</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field" id="fMoins3">
+          <label for="surfaceMoins3">Décor &lt; 3 m (m²)</label>
+          <input class="num-xl" type="number" min="0" step="0.1" id="surfaceMoins3" value="0"/>
+        </div>
+        <div class="field" id="fPlus3">
+          <label for="surfacePlus3">Décor &gt; 3 m (m²)</label>
+          <input class="num-xl" type="number" min="0" step="0.1" id="surfacePlus3" value="0"/>
         </div>
       </div>
 
-      <div class="card">
-        <div class="section-title">Chantier</div>
-
-        <div class="field">
-          <label for="chantierNom">Nom du chantier</label>
-          <input type="text" id="chantierNom" placeholder="Ex : Villa Bretagne / Aquarium Berlin / Client X" />
-          <div class="saved-msg" id="savedMsg">Chantier enregistré</div>
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-label">Surface totale</div>
+          <div class="kpi-value" id="kpiSurface">0<span class="kpi-unit">m²</span></div>
         </div>
-
-        <div class="grid-2">
-          <div class="field">
-            <label for="surfaceMoins3">Décor moins de 3 m (m²)</label>
-            <input class="large-number" type="number" min="0" step="0.1" id="surfaceMoins3" value="0" />
-          </div>
-
-          <div class="field">
-            <label for="surfacePlus3">Décor plus de 3 m (m²)</label>
-            <input class="large-number" type="number" min="0" step="0.1" id="surfacePlus3" value="0" />
-          </div>
+        <div class="kpi">
+          <div class="kpi-label">Productivité</div>
+          <div class="kpi-value" id="kpiProd">12<span class="kpi-unit">m²/j</span></div>
         </div>
+      </div>
 
-        <div class="kpi-inline">
-          <div class="label">Surface totale</div>
-          <div class="value" id="surfaceTotaleDisplay">0 m²</div>
+      <div class="section-label" style="margin-top:8px">Qualité</div>
+      <div class="choices" style="margin-bottom:16px">
+        <button class="btn choice active" data-group="qualite" data-value="moyenne">Moyenne</button>
+        <button class="btn choice" data-group="qualite" data-value="superieure">Supérieure</button>
+      </div>
+
+      <div class="section-label">Conditions</div>
+      <div class="choices" style="margin-bottom:16px">
+        <button class="btn choice active" data-group="conditions" data-value="normal">Normal</button>
+        <button class="btn choice" data-group="conditions" data-value="difficile">Difficile</button>
+      </div>
+
+      <div class="time-preview">
+        <div>
+          <div class="tp-label">Temps chantier estimatif (hors route)</div>
+          <div id="previewWeeks" class="tp-sub">0 jour</div>
         </div>
-
-        <div class="section-title">Qualité</div>
-        <div class="choices">
-          <button class="btn btn-ghost choice active" data-group="qualite" data-value="moyenne">Moyenne</button>
-          <button class="btn btn-ghost choice" data-group="qualite" data-value="superieure">Supérieure</button>
+        <div>
+          <div class="tp-big" id="previewDays">0</div>
+          <div class="tp-unit">jours</div>
         </div>
+      </div>
 
-        <div class="section-title">Conditions</div>
-        <div class="choices">
-          <button class="btn btn-ghost choice active" data-group="conditions" data-value="normal">Normal</button>
-          <button class="btn btn-ghost choice" data-group="conditions" data-value="difficile">Difficile</button>
+      <p class="mini-note" style="margin-bottom:16px">
+        Estimation basée sur une équipe type de 3–4 personnes. Le temps réel varie selon la qualité demandée, la difficulté et l'organisation du chantier.
+      </p>
+
+      <div class="field" id="fRoute">
+        <label for="heuresRoute">Heures de route (total aller + retour)</label>
+        <input type="number" min="0" step="0.5" id="heuresRoute" placeholder="Ex : 4, 8, 12"/>
+        <div class="help-text">Additionner tous les trajets prévus.</div>
+      </div>
+
+      <div class="total-preview">
+        <div>
+          <div class="tp2-label">Temps total avec route</div>
+          <div class="tp2-sub" id="totalWeeks">0 jour</div>
         </div>
+        <div class="tp2-value" id="totalDays">0<span style="font-size:20px;font-weight:700;color:var(--text2);margin-left:8px">j</span></div>
+      </div>
+    </div>
 
-        <div class="preview-time">
-          <div>
-            <div class="small">Temps chantier estimatif<br>(hors route)</div>
-            <div class="preview-sub" id="previewWeeks">0 jour</div>
-          </div>
-          <div>
-            <span class="big" id="previewTimeValue">0</span>
-            <span class="small">jours</span>
-          </div>
+    <!-- FRAIS ADDITIONNELS -->
+    <div class="frais-card">
+      <div class="section-label">Frais additionnels <span style="text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3)">(optionnel)</span></div>
+
+      <div class="grid-3">
+        <div class="field" id="fMO">
+          <label for="mainOeuvre">Main-d'œuvre (€)</label>
+          <input type="number" step="1" id="mainOeuvre" placeholder="—"/>
+          <div class="mini-note">Équipe 3–4 personnes</div>
         </div>
-
-        <div class="mini-note">
-          Estimation indicative basée sur une équipe type de 3 à 4 personnes.<br>
-          Le temps réel varie selon la qualité demandée, la difficulté du chantier, l’organisation et les conditions d’exécution.
+        <div class="field" id="fLog">
+          <label for="logement">Logement (€)</label>
+          <input type="number" step="1" id="logement" placeholder="—"/>
         </div>
-
-        <div class="field" style="margin-top:16px;">
-          <label for="heuresRoute">Heures de route prévues</label>
-          <input type="number" min="0" step="0.1" id="heuresRoute" placeholder="Ex : 4, 8, 12" />
-          <div class="help">
-            Indiquer le nombre total d’heures de route aller + retour à ajouter au chantier.<br>
-            Exemple : si plusieurs allers-retours sont prévus, additionner toutes les heures.
-          </div>
+        <div class="field" id="fLocMat">
+          <label for="locationMateriel">Location matériel (€)</label>
+          <input type="number" step="1" id="locationMateriel" placeholder="—"/>
+          <div class="mini-note">Nacelle, échafaudage…</div>
         </div>
+      </div>
+    </div>
 
-        <div class="live-total-box">
-          <div class="top">
-            <div class="label">Temps total estimatif<br>avec route</div>
-            <div>
-              <span class="value" id="liveTotalDays">0</span>
-              <span class="label">jours</span>
-            </div>
-          </div>
-          <div class="sub" id="liveTotalWeeks">0 jour</div>
-        </div>
+    <!-- ANNEXE COÛTS -->
+    <button class="accordion-btn" id="toggleCosts">
+      <span>Annexe coûts — prix & ratios</span>
+      <span class="accordion-chevron" id="costsChevron">▾</span>
+    </button>
 
-        <div class="annexe-card" style="margin-top:16px; margin-bottom:16px;">
-          <h3 class="annexe-card-title">Frais additionnels</h3>
-          <div class="mini-note" style="margin-bottom:14px;">
-            Base temps indicative pensée pour une équipe de 3 à 4 personnes.
-          </div>
-
+    <div class="accordion-body" id="costsPanel">
+      <div class="annexe-grid">
+        <div class="annexe-card">
+          <div class="annexe-title">Prix matériaux</div>
           <div class="grid-2">
-            <div class="field beige">
-              <label for="mainOeuvre">Main-d’œuvre chantier (€)</label>
-              <input type="number" step="0.01" id="mainOeuvre" placeholder="Optionnel" />
-              <div class="mini-note">Le temps estimatif de l’application est basé sur une équipe type de 3 à 4 personnes.</div>
+            <div class="field">
+              <label for="prixAcier">Acier (€ / ml)</label>
+              <input type="number" step="0.001" id="prixAcier" value="0.8"/>
+              <div class="mini-note">Base : 0,80 € / ml</div>
             </div>
-
-            <div class="field beige">
-              <label for="logement">Logement / hébergement (€)</label>
-              <input type="number" step="0.01" id="logement" placeholder="Optionnel" />
+            <div class="field">
+              <label for="prixGrillage">Grillage (€ / m²)</label>
+              <input type="number" step="0.001" id="prixGrillage" value="6"/>
+              <div class="mini-note">Base : 6,00 € / m²</div>
             </div>
-
-            <div class="field beige">
-              <label for="locationMateriel">Location matériel (€)</label>
-              <input type="number" step="0.01" id="locationMateriel" placeholder="Optionnel" />
-              <div class="mini-note">Ex : nacelle, échafaudage, machine projection, compresseur…</div>
+            <div class="field">
+              <label for="prixBeton">Béton sac 25 kg (€)</label>
+              <input type="number" step="0.001" id="prixBeton" value="13"/>
+              <div class="mini-note">Base : 13,00 € / sac</div>
             </div>
-          </div>
-        </div>
-
-        <button class="btn accordion-toggle" id="toggleCosts">
-          <span>Annexe coûts (optionnelle)</span>
-          <span id="toggleCostsChevron">▾</span>
-        </button>
-
-        <div class="accordion-body" id="costsPanel">
-          <div class="annexe-layout">
-            <div class="annexe-card">
-              <h3 class="annexe-card-title">Prix matériaux</h3>
-              <div class="grid-2">
-                <div class="field beige">
-                  <label for="prixAcier">Acier (€/ml)</label>
-                  <input type="number" step="0.001" id="prixAcier" value="0.8" />
-                  <div class="mini-note">Base conseillée : 0,8 € / ml</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="prixGrillage">Grillage (€/m²)</label>
-                  <input type="number" step="0.001" id="prixGrillage" value="6" />
-                  <div class="mini-note">Base conseillée : 6 € / m²</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="prixBeton">Béton sac 25 kg (€)</label>
-                  <input type="number" step="0.001" id="prixBeton" value="13" />
-                  <div class="mini-note">Base conseillée : 13 € / sac</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="prixBaguette">Baguette (€ / u)</label>
-                  <input type="number" step="0.001" id="prixBaguette" value="0.36" />
-                  <div class="mini-note">Base conseillée : 0,36 € / u</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="prixAgrafe">Agrafe (€ / u)</label>
-                  <input type="number" step="0.001" id="prixAgrafe" value="0.015" />
-                  <div class="mini-note">Base conseillée : 0,015 € / u</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="prixVernis">Vernis (€ / L)</label>
-                  <input type="number" step="0.001" id="prixVernis" value="8" />
-                  <div class="mini-note">Base conseillée : 8 € / L</div>
-                </div>
-              </div>
+            <div class="field">
+              <label for="prixBaguette">Baguette (€ / u)</label>
+              <input type="number" step="0.001" id="prixBaguette" value="0.36"/>
+              <div class="mini-note">Base : 0,36 € / u</div>
             </div>
-
-            <div class="annexe-card">
-              <h3 class="annexe-card-title">Ratios techniques</h3>
-              <div class="grid-2">
-                <div class="field beige">
-                  <label for="ratioAcier">Acier (ml / m²)</label>
-                  <input type="number" step="0.1" id="ratioAcier" value="12" />
-                  <div class="mini-note">Base conseillée : 12 ml / m²</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="ratioGrillage">Grillage (m² / m² décor)</label>
-                  <input type="number" step="0.01" id="ratioGrillage" value="1.1" />
-                  <div class="mini-note">Base conseillée : 1,1 m² / m² décor<br>Inclut ~10 % de recouvrement</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="ratioBeton">Béton (sacs / m²)</label>
-                  <input type="number" step="0.1" id="ratioBeton" value="3.4" />
-                  <div class="mini-note">Base moyenne : 3,4 sacs / m²<br>Base supérieure : 3,8 sacs / m²</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="ratioBaguette">Baguettes (u / m²)</label>
-                  <input type="number" step="0.1" id="ratioBaguette" value="6" />
-                  <div class="mini-note">Base conseillée : 6 u / m²</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="ratioAgrafe">Agrafes (u / m²)</label>
-                  <input type="number" step="0.1" id="ratioAgrafe" value="50" />
-                  <div class="mini-note">Base conseillée : 50 u / m²</div>
-                </div>
-
-                <div class="field beige">
-                  <label for="ratioVernis">Vernis (L / m²)</label>
-                  <input type="number" step="0.01" id="ratioVernis" value="0.2" />
-                  <div class="mini-note">Base conseillée : 0,2 L / m²</div>
-                </div>
-              </div>
+            <div class="field">
+              <label for="prixAgrafe">Agrafe (€ / u)</label>
+              <input type="number" step="0.001" id="prixAgrafe" value="0.015"/>
+              <div class="mini-note">Base : 0,015 € / u</div>
+            </div>
+            <div class="field">
+              <label for="prixVernis">Vernis (€ / L)</label>
+              <input type="number" step="0.001" id="prixVernis" value="8"/>
+              <div class="mini-note">Base : 8,00 € / L</div>
             </div>
           </div>
         </div>
 
-        <button class="btn btn-primary calc-btn" id="btnCalculer">Calculer</button>
+        <div class="annexe-card">
+          <div class="annexe-title">Ratios techniques</div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="ratioAcier">Acier (ml / m²)</label>
+              <input type="number" step="0.1" id="ratioAcier" value="12"/>
+              <div class="mini-note">Base : 12 ml / m²</div>
+            </div>
+            <div class="field">
+              <label for="ratioGrillage">Grillage (m² / m²)</label>
+              <input type="number" step="0.01" id="ratioGrillage" value="1.1"/>
+              <div class="mini-note">Base : 1,1 · Inclut 10 % recouvrement</div>
+            </div>
+            <div class="field">
+              <label for="ratioBeton">Béton (sacs / m²)</label>
+              <input type="number" step="0.1" id="ratioBeton" value="3.4"/>
+              <div class="mini-note">Moy. : 3,4 — Sup. : 3,8</div>
+            </div>
+            <div class="field">
+              <label for="ratioBaguette">Baguettes (u / m²)</label>
+              <input type="number" step="0.1" id="ratioBaguette" value="6"/>
+              <div class="mini-note">Base : 6 u / m²</div>
+            </div>
+            <div class="field">
+              <label for="ratioAgrafe">Agrafes (u / m²)</label>
+              <input type="number" step="1" id="ratioAgrafe" value="50"/>
+              <div class="mini-note">Base : 50 u / m²</div>
+            </div>
+            <div class="field">
+              <label for="ratioVernis">Vernis (L / m²)</label>
+              <input type="number" step="0.01" id="ratioVernis" value="0.2"/>
+              <div class="mini-note">Base : 0,2 L / m²</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div id="viewResults" class="hidden">
-      <div class="results-header">
-        <button class="back-link" id="btnBack">← Retour</button>
-        <button class="btn btn-soft" id="btnNew">➕ Nouveau</button>
+    <button class="btn btn-primary calc-btn" id="btnCalc">⚡ Calculer</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       VUE RÉSULTATS
+  ══════════════════════════════════════ -->
+  <div id="viewResults" class="hidden">
+    <div class="results-topbar">
+      <button class="back-btn" id="btnBack">← Retour</button>
+      <button class="btn btn-dim" id="btnNew" style="font-size:15px">➕ Nouveau</button>
+    </div>
+
+    <div class="results-heading">Résultats</div>
+    <div class="results-chantier" id="rNom">—</div>
+
+    <!-- Surfaces -->
+    <div class="card card-result">
+      <div class="section-label">Surfaces</div>
+      <div class="r-line">
+        <span class="rl-label">Décor moins de 3 m</span>
+        <span class="rl-value" id="rMoins3">0 m²</span>
       </div>
-
-      <h2 class="results-title">Résultats</h2>
-      <div id="resultNom" style="font-size:26px;font-weight:700;color:var(--cuivre);margin:12px 0 20px;"></div>
-
-      <div class="card card-muted">
-        <div class="section-title">Surfaces</div>
-        <div class="line-item"><div class="label">Décor moins de 3 m</div><div class="value" id="rMoins3">0 m²</div></div>
-        <div class="line-item"><div class="label">Décor plus de 3 m</div><div class="value" id="rPlus3">0 m²</div></div>
-        <div class="line-item"><div class="label"><strong>Surface totale</strong></div><div class="value"><strong class="cuivre" id="rSurfaceTotale">0 m²</strong></div></div>
+      <div class="r-line">
+        <span class="rl-label">Décor plus de 3 m</span>
+        <span class="rl-value" id="rPlus3">0 m²</span>
       </div>
-
-      <div class="card card-muted">
-        <div class="section-title">Paramètres</div>
-        <div class="line-item"><div class="label">Qualité</div><div class="value" id="rQualite">Moyenne</div></div>
-        <div class="line-item"><div class="label">Conditions</div><div class="value" id="rConditions">Normal</div></div>
-      </div>
-
-      <div class="card">
-        <div class="section-title">Matériaux</div>
-        <div class="line-item"><div class="label">Acier 7 mm (<span id="qAcier">0</span> ml)</div><div class="value" id="cAcier">0 €</div></div>
-        <div class="line-item"><div class="label">Grillage (<span id="qGrillage">0</span> m²)</div><div class="value" id="cGrillage">0 €</div></div>
-        <div class="line-item"><div class="label">Béton (<span id="qBeton">0</span> sacs)</div><div class="value" id="cBeton">0 €</div></div>
-        <div class="line-item"><div class="label">Baguettes (<span id="qBaguette">0</span> u)</div><div class="value" id="cBaguette">0 €</div></div>
-        <div class="line-item"><div class="label">Agrafes (<span id="qAgrafe">0</span> u)</div><div class="value" id="cAgrafe">0 €</div></div>
-        <div class="line-item"><div class="label">Vernis (<span id="qVernis">0</span> L)</div><div class="value" id="cVernis">0 €</div></div>
-        <div class="line-item"><div class="label">Patines</div><div class="value">Prévoir minimum 4 couleurs</div></div>
-        <div class="line-item"><div class="label"><strong>Total matériaux</strong></div><div class="value"><strong class="cuivre" id="rTotalMateriaux">0 €</strong></div></div>
-      </div>
-
-      <div class="card card-blue">
-        <div class="section-title">Temps estimatif</div>
-        <div class="line-item"><div class="label">Temps chantier estimatif</div><div class="value" id="rTempsChantier">0 jours</div></div>
-        <div class="weeks-row" id="rTempsChantierSemaines">0 jour</div>
-
-        <div class="line-item" id="rowTempsRoute"><div class="label">Temps route</div><div class="value" id="rTempsRoute">0 jours</div></div>
-
-        <div class="line-item"><div class="label">Temps total estimatif</div><div class="value" id="rTempsTotal">0 jours</div></div>
-        <div class="weeks-row" id="rTempsTotalSemaines">0 jour</div>
-
-        <div class="mini-note" style="margin-top:14px;color:#5F6772;">
-          Estimation indicative basée sur une équipe type de 3 à 4 personnes.<br>
-          Le temps réel varie selon la qualité demandée, la difficulté du chantier, l’organisation et les conditions d’exécution.
-        </div>
-
-        <div class="total-box">
-          <div class="over">Total arrondi</div>
-          <div><span class="big" id="rTempsArrondi">0</span><span class="unit">jours</span></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="section-title">Coûts</div>
-        <div class="line-item"><div class="label">Total matériaux</div><div class="value" id="sumMat">0 €</div></div>
-        <div class="line-item hidden" id="rowMo"><div class="label">Main-d’œuvre</div><div class="value" id="sumMo">0 €</div></div>
-        <div class="line-item hidden" id="rowLog"><div class="label">Logement / hébergement</div><div class="value" id="sumLog">0 €</div></div>
-        <div class="line-item hidden" id="rowLocMat"><div class="label">Location matériel</div><div class="value" id="sumLocMat">0 €</div></div>
-        <div class="line-item"><div class="label"><strong>Total général</strong></div><div class="value"><strong class="cuivre" id="sumGeneral">0 €</strong></div></div>
-      </div>
-
-      <div class="muted-center">
-        Matériaux et coûts matériaux calculés sur les ratios saisis. Temps indicatif.
-      </div>
-
-      <div class="bottom-actions">
-        <button class="btn btn-primary" id="btnWhatsapp">📨 WhatsApp</button>
-        <button class="btn btn-ghost" id="btnPdf">📄 PDF</button>
-        <button class="btn btn-primary" id="btnModifier">✏️ Modifier</button>
+      <div class="r-line">
+        <span class="rl-label"><strong>Surface totale</strong></span>
+        <span class="rl-value accent" id="rSurfTot">0 m²</span>
       </div>
     </div>
 
-    <div class="modal-backdrop" id="savedProjectsModal">
-      <div class="modal">
-        <div class="modal-head">
-          <h3>Mes chantiers</h3>
-          <button class="btn btn-muted" id="btnCloseProjects">Fermer</button>
-        </div>
-        <div id="savedProjectsList"></div>
+    <!-- Paramètres -->
+    <div class="card card-result">
+      <div class="section-label">Paramètres</div>
+      <div class="r-line">
+        <span class="rl-label">Qualité</span>
+        <span class="rl-value" id="rQualite">Moyenne</span>
       </div>
+      <div class="r-line">
+        <span class="rl-label">Conditions</span>
+        <span class="rl-value" id="rConditions">Normal</span>
+      </div>
+    </div>
+
+    <!-- Matériaux -->
+    <div class="card">
+      <div class="section-label">Matériaux</div>
+      <div class="r-line">
+        <span class="rl-label">Acier 7 mm (<span id="qAcier">0</span> ml)</span>
+        <span class="rl-value" id="cAcier">0 €</span>
+      </div>
+      <div class="r-line">
+        <span class="rl-label">Grillage (<span id="qGrillage">0</span> m²)</span>
+        <span class="rl-value" id="cGrillage">0 €</span>
+      </div>
+      <div class="r-line">
+        <span class="rl-label">Béton (<span id="qBeton">0</span> sacs)</span>
+        <span class="rl-value" id="cBeton">0 €</span>
+      </div>
+      <div class="r-line">
+        <span class="rl-label">Baguettes (<span id="qBaguette">0</span> u)</span>
+        <span class="rl-value" id="cBaguette">0 €</span>
+      </div>
+      <div class="r-line">
+        <span class="rl-label">Agrafes (<span id="qAgrafe">0</span> u)</span>
+        <span class="rl-value" id="cAgrafe">0 €</span>
+      </div>
+      <div class="r-line">
+        <span class="rl-label">Vernis (<span id="qVernis">0</span> L)</span>
+        <span class="rl-value" id="cVernis">0 €</span>
+      </div>
+      <div class="r-line">
+        <span class="rl-label">Patines</span>
+        <span class="rl-value" style="color:var(--text2);font-size:15px">Min. 4 couleurs</span>
+      </div>
+      <div class="r-line">
+        <span class="rl-label"><strong>Total matériaux</strong></span>
+        <span class="rl-value accent" id="rTotMat">0 €</span>
+      </div>
+    </div>
+
+    <!-- Temps -->
+    <div class="card" style="border-color:var(--cuivre-dark)">
+      <div class="section-label">Temps estimatif</div>
+      <div class="r-line">
+        <div>
+          <div class="rl-label">Temps chantier</div>
+          <div class="r-sub" id="rChantierSem">0 jour</div>
+        </div>
+        <span class="rl-value" id="rChantierJ">0 j</span>
+      </div>
+      <div class="r-line hidden" id="rowRoute">
+        <span class="rl-label">Temps route</span>
+        <span class="rl-value" id="rRouteJ">0 j</span>
+      </div>
+      <div class="r-line">
+        <div>
+          <div class="rl-label">Temps total</div>
+          <div class="r-sub" id="rTotalSem">0 jour</div>
+        </div>
+        <span class="rl-value" id="rTotalJ">0 j</span>
+      </div>
+
+      <p class="mini-note" style="margin-top:12px">
+        Estimation indicative — équipe type 3–4 personnes. Le temps réel varie selon les conditions d'exécution.
+      </p>
+
+      <div class="result-total-box">
+        <div class="rtb-label">Total arrondi</div>
+        <div>
+          <span class="rtb-value" id="rArrondi">0</span>
+          <span class="rtb-unit">jours</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coûts -->
+    <div class="card">
+      <div class="section-label">Coûts</div>
+      <div class="r-line">
+        <span class="rl-label">Total matériaux</span>
+        <span class="rl-value" id="sMat">0 €</span>
+      </div>
+      <div class="r-line hidden" id="rowMO">
+        <span class="rl-label">Main-d'œuvre</span>
+        <span class="rl-value" id="sMO">0 €</span>
+      </div>
+      <div class="r-line hidden" id="rowLog">
+        <span class="rl-label">Logement</span>
+        <span class="rl-value" id="sLog">0 €</span>
+      </div>
+      <div class="r-line hidden" id="rowLocMat">
+        <span class="rl-label">Location matériel</span>
+        <span class="rl-value" id="sLocMat">0 €</span>
+      </div>
+      <div class="r-line">
+        <span class="rl-label"><strong>Total général</strong></span>
+        <span class="rl-value accent" id="sGeneral">0 €</span>
+      </div>
+    </div>
+
+    <div class="muted-note">Matériaux calculés sur ratios saisis · Temps indicatif</div>
+
+    <div class="bottom-actions">
+      <button class="btn btn-primary" id="btnWhatsapp">📨 WhatsApp</button>
+      <button class="btn btn-ghost" id="btnPdf">📄 PDF</button>
+      <button class="btn btn-dim" id="btnModifier">✏️ Modifier</button>
     </div>
   </div>
 
-  <script>
-    const STORAGE_KEYS = {
-      globalSettings: "calcul_ard_global_settings_v11",
-      savedProjects: "calcul_ard_saved_projects_v11"
-    };
-
-    const state = {
-      qualite: "moyenne",
-      conditions: "normal",
-      lastResults: null,
-      betonManuel: false
-    };
-
-    const defaultSettings = {
-      prixAcier: 0.8,
-      prixGrillage: 6,
-      prixBeton: 13,
-      prixBaguette: 0.36,
-      prixAgrafe: 0.015,
-      prixVernis: 8,
-      ratioAcier: 12,
-      ratioGrillage: 1.1,
-      ratioBeton: 3.4,
-      ratioBaguette: 6,
-      ratioAgrafe: 50,
-      ratioVernis: 0.2
-    };
-
-    const els = {
-      viewForm: document.getElementById("viewForm"),
-      viewResults: document.getElementById("viewResults"),
-      chantierNom: document.getElementById("chantierNom"),
-      surfaceMoins3: document.getElementById("surfaceMoins3"),
-      surfacePlus3: document.getElementById("surfacePlus3"),
-      surfaceTotaleDisplay: document.getElementById("surfaceTotaleDisplay"),
-      heuresRoute: document.getElementById("heuresRoute"),
-      previewTimeValue: document.getElementById("previewTimeValue"),
-      previewWeeks: document.getElementById("previewWeeks"),
-      liveTotalDays: document.getElementById("liveTotalDays"),
-      liveTotalWeeks: document.getElementById("liveTotalWeeks"),
-      toggleCosts: document.getElementById("toggleCosts"),
-      toggleCostsChevron: document.getElementById("toggleCostsChevron"),
-      costsPanel: document.getElementById("costsPanel"),
-      btnCalculer: document.getElementById("btnCalculer"),
-      btnBack: document.getElementById("btnBack"),
-      btnModifier: document.getElementById("btnModifier"),
-      btnWhatsapp: document.getElementById("btnWhatsapp"),
-      btnPdf: document.getElementById("btnPdf"),
-      btnNew: document.getElementById("btnNew"),
-      btnSavedProjects: document.getElementById("btnSavedProjects"),
-      savedProjectsModal: document.getElementById("savedProjectsModal"),
-      btnCloseProjects: document.getElementById("btnCloseProjects"),
-      savedProjectsList: document.getElementById("savedProjectsList"),
-      savedMsg: document.getElementById("savedMsg"),
-      resultNom: document.getElementById("resultNom"),
-      rowTempsRoute: document.getElementById("rowTempsRoute"),
-      rowMo: document.getElementById("rowMo"),
-      rowLog: document.getElementById("rowLog"),
-      rowLocMat: document.getElementById("rowLocMat"),
-      ratioBeton: document.getElementById("ratioBeton")
-    };
-
-    const settingInputs = [
-      "prixAcier","prixGrillage","prixBeton","prixBaguette","prixAgrafe","prixVernis",
-      "ratioAcier","ratioGrillage","ratioBeton","ratioBaguette","ratioAgrafe","ratioVernis"
-    ];
-
-    function toNumber(v){
-      if (v === null || v === undefined || v === "") return 0;
-      return Number(String(v).replace(",", ".")) || 0;
-    }
-
-    function formatMoney(v){
-      return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(v || 0);
-    }
-
-    function formatNum(v, digits = 1){
-      const n = Number(v || 0);
-      return Number.isInteger(n)
-        ? String(n)
-        : n.toFixed(digits).replace(/\.0+$/,"").replace(".", ",");
-    }
-
-    function formatWeeksDays(days){
-      const d = Number(days || 0);
-      const weeks = Math.floor(d / 5);
-      const rest = d - (weeks * 5);
-      if (weeks <= 0) return `${formatNum(d)} jour${d > 1 ? "s" : ""}`;
-      if (rest <= 0.05) return `${weeks} semaine${weeks > 1 ? "s" : ""}`;
-      return `${weeks} semaine${weeks > 1 ? "s" : ""} + ${formatNum(rest)} jour${rest > 1 ? "s" : ""}`;
-    }
-
-    function nowDateFr(){
-      return new Date().toLocaleDateString("fr-FR");
-    }
-
-    function getSettings(){
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.globalSettings) || "null");
-      return { ...defaultSettings, ...(stored || {}) };
-    }
-
-    function saveSettings(){
-      const payload = {};
-      settingInputs.forEach(id => {
-        payload[id] = toNumber(document.getElementById(id).value);
-      });
-      localStorage.setItem(STORAGE_KEYS.globalSettings, JSON.stringify(payload));
-    }
-
-    function getDefaultBetonRatio(){
-      return state.qualite === "superieure" ? 3.8 : 3.4;
-    }
-
-    function applyDefaultBetonRatio(force = false){
-      if (!state.betonManuel || force){
-        els.ratioBeton.value = getDefaultBetonRatio();
-        saveSettings();
-      }
-    }
-
-    function applySettingsToInputs(){
-      const s = getSettings();
-      settingInputs.forEach(id => {
-        document.getElementById(id).value = s[id];
-      });
-    }
-
-    function getSavedProjects(){
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.savedProjects) || "[]");
-    }
-
-    function saveSavedProjects(projects){
-      localStorage.setItem(STORAGE_KEYS.savedProjects, JSON.stringify(projects));
-    }
-
-    function getSurfaceTotale(){
-      return toNumber(els.surfaceMoins3.value) + toNumber(els.surfacePlus3.value);
-    }
-
-    function getProductiviteJour(){
-      // Base indicative équipe 3 à 4 personnes
-      // moyenne + normal = 12 m²/j
-      // moyenne + difficile = 10 m²/j
-      // supérieure + normal = 10 m²/j
-      // supérieure + difficile = 8 m²/j
-      if (state.qualite === "superieure" && state.conditions === "difficile") return 8;
-      if (state.qualite === "superieure" && state.conditions === "normal") return 10;
-      if (state.qualite === "moyenne" && state.conditions === "difficile") return 10;
-      return 12;
-    }
-
-    function computePreviewTime(){
-      return getSurfaceTotale() / getProductiviteJour();
-    }
-
-    function updateLivePreview(){
-      const surfaceTotale = getSurfaceTotale();
-      const chantier = computePreviewTime();
-      const route = toNumber(els.heuresRoute.value) > 0 ? toNumber(els.heuresRoute.value) / 8 : 0;
-      const total = chantier + route;
-
-      els.surfaceTotaleDisplay.textContent = `${formatNum(surfaceTotale)} m²`;
-      els.previewTimeValue.textContent = formatNum(chantier);
-      els.previewWeeks.textContent = formatWeeksDays(chantier);
-      els.liveTotalDays.textContent = formatNum(total);
-      els.liveTotalWeeks.textContent = formatWeeksDays(total);
-    }
-
-    function computeAll(){
-      const nom = els.chantierNom.value.trim();
-      const moins3 = toNumber(els.surfaceMoins3.value);
-      const plus3 = toNumber(els.surfacePlus3.value);
-      const surfaceTotale = moins3 + plus3;
-      const heuresRoute = toNumber(els.heuresRoute.value);
-      const settings = getSettings();
-
-      const tempsChantier = surfaceTotale / getProductiviteJour();
-      const tempsRoute = heuresRoute > 0 ? heuresRoute / 8 : 0;
-      const tempsTotal = tempsChantier + tempsRoute;
-      const tempsArrondi = Math.ceil(tempsTotal);
-
-      const qAcier = surfaceTotale * settings.ratioAcier;
-      const qGrillage = surfaceTotale * settings.ratioGrillage;
-      const qBeton = surfaceTotale * settings.ratioBeton;
-      const qBaguette = surfaceTotale * settings.ratioBaguette;
-      const qAgrafe = surfaceTotale * settings.ratioAgrafe;
-      const qVernis = surfaceTotale * settings.ratioVernis;
-
-      const cAcier = qAcier * settings.prixAcier;
-      const cGrillage = qGrillage * settings.prixGrillage;
-      const cBeton = qBeton * settings.prixBeton;
-      const cBaguette = qBaguette * settings.prixBaguette;
-      const cAgrafe = qAgrafe * settings.prixAgrafe;
-      const cVernis = qVernis * settings.prixVernis;
-
-      const totalMateriaux = cAcier + cGrillage + cBeton + cBaguette + cAgrafe + cVernis;
-
-      const mainOeuvre = toNumber(document.getElementById("mainOeuvre").value);
-      const logement = toNumber(document.getElementById("logement").value);
-      const locationMateriel = toNumber(document.getElementById("locationMateriel").value);
-      const totalGeneral = totalMateriaux + mainOeuvre + logement + locationMateriel;
-
-      return {
-        nom,
-        date: nowDateFr(),
-        qualite: state.qualite,
-        conditions: state.conditions,
-        moins3,
-        plus3,
-        surfaceTotale,
-        heuresRoute,
-        tempsChantier,
-        tempsRoute,
-        tempsTotal,
-        tempsArrondi,
-        quantities: {
-          acier: qAcier,
-          grillage: qGrillage,
-          beton: qBeton,
-          baguette: qBaguette,
-          agrafe: qAgrafe,
-          vernis: qVernis
-        },
-        costs: {
-          acier: cAcier,
-          grillage: cGrillage,
-          beton: cBeton,
-          baguette: cBaguette,
-          agrafe: cAgrafe,
-          vernis: cVernis,
-          totalMateriaux,
-          mainOeuvre,
-          logement,
-          locationMateriel,
-          totalGeneral
-        }
-      };
-    }
-
-    function fillResults(data){
-      state.lastResults = data;
-
-      els.resultNom.textContent = data.nom || "Chantier sans nom";
-      document.getElementById("rMoins3").textContent = `${formatNum(data.moins3)} m²`;
-      document.getElementById("rPlus3").textContent = `${formatNum(data.plus3)} m²`;
-      document.getElementById("rSurfaceTotale").textContent = `${formatNum(data.surfaceTotale)} m²`;
-      document.getElementById("rQualite").textContent = data.qualite === "superieure" ? "Supérieure" : "Moyenne";
-      document.getElementById("rConditions").textContent = data.conditions === "difficile" ? "Difficile" : "Normal";
-
-      document.getElementById("qAcier").textContent = formatNum(data.quantities.acier);
-      document.getElementById("qGrillage").textContent = formatNum(data.quantities.grillage);
-      document.getElementById("qBeton").textContent = formatNum(data.quantities.beton);
-      document.getElementById("qBaguette").textContent = formatNum(data.quantities.baguette);
-      document.getElementById("qAgrafe").textContent = formatNum(data.quantities.agrafe);
-      document.getElementById("qVernis").textContent = formatNum(data.quantities.vernis);
-
-      document.getElementById("cAcier").textContent = formatMoney(data.costs.acier);
-      document.getElementById("cGrillage").textContent = formatMoney(data.costs.grillage);
-      document.getElementById("cBeton").textContent = formatMoney(data.costs.beton);
-      document.getElementById("cBaguette").textContent = formatMoney(data.costs.baguette);
-      document.getElementById("cAgrafe").textContent = formatMoney(data.costs.agrafe);
-      document.getElementById("cVernis").textContent = formatMoney(data.costs.vernis);
-      document.getElementById("rTotalMateriaux").textContent = formatMoney(data.costs.totalMateriaux);
-
-      document.getElementById("rTempsChantier").textContent = `${formatNum(data.tempsChantier)} jours`;
-      document.getElementById("rTempsRoute").textContent = `${formatNum(data.tempsRoute)} jours`;
-      document.getElementById("rTempsTotal").textContent = `${formatNum(data.tempsTotal)} jours`;
-      document.getElementById("rTempsArrondi").textContent = formatNum(data.tempsArrondi,0);
-      document.getElementById("rTempsChantierSemaines").textContent = formatWeeksDays(data.tempsChantier);
-      document.getElementById("rTempsTotalSemaines").textContent = formatWeeksDays(data.tempsTotal);
-
-      els.rowTempsRoute.classList.toggle("hidden", data.tempsRoute <= 0);
-
-      document.getElementById("sumMat").textContent = formatMoney(data.costs.totalMateriaux);
-      document.getElementById("sumGeneral").textContent = formatMoney(data.costs.totalGeneral);
-
-      if (data.costs.mainOeuvre > 0){
-        els.rowMo.classList.remove("hidden");
-        document.getElementById("sumMo").textContent = formatMoney(data.costs.mainOeuvre);
-      } else {
-        els.rowMo.classList.add("hidden");
-      }
-
-      if (data.costs.logement > 0){
-        els.rowLog.classList.remove("hidden");
-        document.getElementById("sumLog").textContent = formatMoney(data.costs.logement);
-      } else {
-        els.rowLog.classList.add("hidden");
-      }
-
-      if (data.costs.locationMateriel > 0){
-        els.rowLocMat.classList.remove("hidden");
-        document.getElementById("sumLocMat").textContent = formatMoney(data.costs.locationMateriel);
-      } else {
-        els.rowLocMat.classList.add("hidden");
-      }
-    }
-
-    function saveCurrentProjectIfNamed(data){
-      if (!data.nom) return;
-      const projects = getSavedProjects();
-      const idx = projects.findIndex(p => p.nom.toLowerCase() === data.nom.toLowerCase());
-
-      const projectPayload = {
-        ...data,
-        updatedAt: new Date().toISOString()
-      };
-
-      if (idx >= 0){
-        projects[idx] = projectPayload;
-        showSavedMessage("Chantier mis à jour");
-      } else {
-        projects.unshift(projectPayload);
-        showSavedMessage("Chantier enregistré");
-      }
-
-      saveSavedProjects(projects);
-      renderSavedProjects();
-    }
-
-    function showSavedMessage(msg){
-      els.savedMsg.textContent = msg;
-      els.savedMsg.classList.add("show");
-      clearTimeout(showSavedMessage._t);
-      showSavedMessage._t = setTimeout(() => {
-        els.savedMsg.classList.remove("show");
-      }, 2200);
-    }
-
-    function renderSavedProjects(){
-      const projects = getSavedProjects();
-      if (!projects.length){
-        els.savedProjectsList.innerHTML = `<div class="empty-state">Aucun chantier enregistré pour le moment.</div>`;
-        return;
-      }
-
-      els.savedProjectsList.innerHTML = projects.map((p, idx) => `
-        <div class="saved-project">
-          <div>
-            <div class="name">${escapeHtml(p.nom || "Sans nom")}</div>
-            <div class="meta">
-              Mis à jour : ${new Date(p.updatedAt).toLocaleString("fr-FR")}<br>
-              Surface : ${formatNum(p.surfaceTotale)} m² — Total arrondi : ${formatNum(p.tempsArrondi,0)} jours
-            </div>
-          </div>
-          <div class="saved-actions">
-            <button class="btn btn-soft btn-compact" onclick="openSavedProject(${idx})">Ouvrir</button>
-            <button class="btn btn-danger btn-compact" onclick="deleteSavedProject(${idx})">Supprimer</button>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function openSavedProject(index){
-      const projects = getSavedProjects();
-      const p = projects[index];
-      if (!p) return;
-
-      els.chantierNom.value = p.nom || "";
-      els.surfaceMoins3.value = p.moins3 ?? 0;
-      els.surfacePlus3.value = p.plus3 ?? 0;
-      els.heuresRoute.value = p.heuresRoute ?? "";
-
-      state.qualite = p.qualite || "moyenne";
-      state.conditions = p.conditions || "normal";
-      syncChoiceButtons();
-
-      document.getElementById("mainOeuvre").value = p.costs?.mainOeuvre || "";
-      document.getElementById("logement").value = p.costs?.logement || "";
-      document.getElementById("locationMateriel").value = p.costs?.locationMateriel || "";
-
-      updateLivePreview();
-      fillResults(p);
-      closeSavedProjects();
-      showResults();
-    }
-
-    function deleteSavedProject(index){
-      const projects = getSavedProjects();
-      projects.splice(index,1);
-      saveSavedProjects(projects);
-      renderSavedProjects();
-    }
-
-    window.openSavedProject = openSavedProject;
-    window.deleteSavedProject = deleteSavedProject;
-
-    function closeSavedProjects(){
-      els.savedProjectsModal.classList.remove("show");
-    }
-
-    function showResults(){
-      els.viewForm.classList.add("hidden");
-      els.viewResults.classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function showForm(){
-      els.viewResults.classList.add("hidden");
-      els.viewForm.classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function syncChoiceButtons(){
-      document.querySelectorAll(".choice").forEach(btn => {
-        const group = btn.dataset.group;
-        const value = btn.dataset.value;
-        const current = state[group];
-        btn.classList.toggle("active", current === value);
-
-        if (btn.classList.contains("active")){
-          btn.classList.remove("btn-ghost");
-          btn.classList.add("btn-primary");
-        } else {
-          btn.classList.remove("btn-primary");
-          btn.classList.add("btn-ghost");
-        }
-      });
-    }
-
-    function buildWhatsappText(data){
-      const parts = [];
-      parts.push(`CHANTIER : ${data.nom || "Sans nom"}`);
-      parts.push(`Date : ${data.date}`);
-      parts.push("");
-      parts.push(`SURFACES :`);
-      parts.push(`- Décor moins de 3 m : ${formatNum(data.moins3)} m²`);
-      parts.push(`- Décor plus de 3 m : ${formatNum(data.plus3)} m²`);
-      parts.push(`- Surface totale : ${formatNum(data.surfaceTotale)} m²`);
-      parts.push("");
-      parts.push(`TEMPS :`);
-      parts.push(`- Chantier : ${formatNum(data.tempsChantier)} jours`);
-      parts.push(`- Équivalent chantier : ${formatWeeksDays(data.tempsChantier)}`);
-      if (data.tempsRoute > 0) parts.push(`- Route : ${formatNum(data.tempsRoute)} jours`);
-      parts.push(`- Total : ${formatNum(data.tempsTotal)} jours`);
-      parts.push(`- Équivalent total : ${formatWeeksDays(data.tempsTotal)}`);
-      parts.push(`- Total arrondi : ${formatNum(data.tempsArrondi,0)} jours`);
-      parts.push("");
-      parts.push(`MATÉRIAUX :`);
-      parts.push(`- Acier : ${formatNum(data.quantities.acier)} ml`);
-      parts.push(`- Grillage : ${formatNum(data.quantities.grillage)} m²`);
-      parts.push(`- Béton : ${formatNum(data.quantities.beton)} sacs`);
-      parts.push(`- Baguettes : ${formatNum(data.quantities.baguette,0)} u`);
-      parts.push(`- Agrafes : ${formatNum(data.quantities.agrafe,0)} u`);
-      parts.push(`- Vernis : ${formatNum(data.quantities.vernis)} L`);
-      return parts.join("\n");
-    }
-function openPdfWindow(){
-  if (!state.lastResults) return;
-
-  const data = state.lastResults;
-  const pdfWindow = window.open("", "_blank", "width=1000,height=900");
-
-  if (!pdfWindow) {
-    alert("Impossible d’ouvrir la fenêtre PDF. Vérifie que le navigateur n’a pas bloqué la fenêtre.");
-    return;
-  }
-
-  const rowRoute = data.tempsRoute > 0
-    ? `<div class="print-row"><span>Temps route</span><strong>${formatNum(data.tempsRoute)} jours</strong></div>`
-    : "";
-
-  const rowMainOeuvre = data.costs.mainOeuvre > 0
-    ? `<div class="print-row"><span>Main-d’œuvre</span><strong>${formatMoney(data.costs.mainOeuvre)}</strong></div>`
-    : "";
-
-  const rowLogement = data.costs.logement > 0
-    ? `<div class="print-row"><span>Logement / hébergement</span><strong>${formatMoney(data.costs.logement)}</strong></div>`
-    : "";
-
-  const rowLocationMateriel = data.costs.locationMateriel > 0
-    ? `<div class="print-row"><span>Location matériel</span><strong>${formatMoney(data.costs.locationMateriel)}</strong></div>`
-    : "";
-
-  pdfWindow.document.write(`
-    <html lang="fr">
-      <head>
-        <meta charset="UTF-8">
-        <title>Calcul ARD - PDF</title>
-        <style>
-          body{margin:0;font-family:Arial,sans-serif;color:#1F2A34;background:#f8f8f8}
-          .toolbar{position:sticky;top:0;background:#ffffff;border-bottom:1px solid #ddd;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;z-index:5}
-          .toolbar h2{margin:0;font-size:18px}
-          .toolbar button{border:none;border-radius:12px;padding:12px 16px;background:#C8752B;color:#fff;font-weight:700;cursor:pointer}
-          .sheet{max-width:900px;margin:24px auto;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:24px}
-          h1{margin:0 0 8px;font-size:28px}
-          .sub{margin:0 0 20px;color:#666;font-size:14px}
-          .print-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
-          .print-card{border:1px solid #ddd;border-radius:14px;padding:14px;break-inside:avoid;margin-bottom:18px}
-          .print-card h3{margin:0 0 10px;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:#666}
-          .print-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #eee;font-size:14px}
-          .print-row:last-child{border-bottom:none}
-          .print-total{margin-top:14px;background:#f2f2f2;border-radius:12px;padding:12px;font-size:18px;font-weight:800;display:flex;justify-content:space-between}
-          .weeks{margin-top:8px;font-size:13px;color:#666;font-weight:700}
-          @media print{
-            body{background:#fff}
-            .toolbar{display:none}
-            .sheet{box-shadow:none;margin:0;max-width:none;padding:0}
-          }
-        </style>
-      </head>
-      <body>
-        <div class="toolbar">
-          <h2>Calcul ARD - PDF</h2>
-          <button onclick="window.print()">Imprimer / Enregistrer en PDF</button>
-        </div>
-
-        <div class="sheet">
-          <h1>Calcul ARD</h1>
-          <p class="sub">Document chantier — ${data.date}</p>
-
-          <div class="print-grid">
-            <div class="print-card">
-              <h3>Résumé</h3>
-              <div class="print-row"><span>Chantier</span><strong>${data.nom || "Chantier sans nom"}</strong></div>
-              <div class="print-row"><span>Décor moins de 3 m</span><strong>${formatNum(data.moins3)} m²</strong></div>
-              <div class="print-row"><span>Décor plus de 3 m</span><strong>${formatNum(data.plus3)} m²</strong></div>
-              <div class="print-row"><span>Surface totale</span><strong>${formatNum(data.surfaceTotale)} m²</strong></div>
-              <div class="print-row"><span>Qualité</span><strong>${data.qualite === "superieure" ? "Supérieure" : "Moyenne"}</strong></div>
-              <div class="print-row"><span>Conditions</span><strong>${data.conditions === "difficile" ? "Difficile" : "Normal"}</strong></div>
-            </div>
-
-            <div class="print-card">
-              <h3>Temps</h3>
-              <div class="print-row"><span>Temps chantier</span><strong>${formatNum(data.tempsChantier)} jours</strong></div>
-              <div class="weeks">${formatWeeksDays(data.tempsChantier)}</div>
-              ${rowRoute}
-              <div class="print-row"><span>Temps total</span><strong>${formatNum(data.tempsTotal)} jours</strong></div>
-              <div class="weeks">${formatWeeksDays(data.tempsTotal)}</div>
-              <div class="print-total"><span>Total arrondi</span><span>${formatNum(data.tempsArrondi,0)} jours</span></div>
-            </div>
-          </div>
-
-          <div class="print-card" style="margin-bottom:18px;">
-            <h3>Matériaux</h3>
-            <div class="print-row"><span>Acier 7 mm</span><strong>${formatNum(data.quantities.acier)} ml</strong></div>
-            <div class="print-row"><span>Grillage</span><strong>${formatNum(data.quantities.grillage)} m²</strong></div>
-            <div class="print-row"><span>Béton</span><strong>${formatNum(data.quantities.beton)} sacs</strong></div>
-            <div class="print-row"><span>Baguettes</span><strong>${formatNum(data.quantities.baguette,0)} u</strong></div>
-            <div class="print-row"><span>Agrafes</span><strong>${formatNum(data.quantities.agrafe,0)} u</strong></div>
-            <div class="print-row"><span>Vernis</span><strong>${formatNum(data.quantities.vernis)} L</strong></div>
-            <div class="print-row"><span>Patines</span><strong>Prévoir minimum 4 couleurs</strong></div>
-            <div class="print-total"><span>Total matériaux</span><span>${formatMoney(data.costs.totalMateriaux)}</span></div>
-          </div>
-
-          <div class="print-card" style="margin-bottom:18px;">
-            <h3>Coûts</h3>
-            <div class="print-row"><span>Total matériaux</span><strong>${formatMoney(data.costs.totalMateriaux)}</strong></div>
-            ${rowMainOeuvre}
-            ${rowLogement}
-            ${rowLocationMateriel}
-            <div class="print-total"><span>Total général</span><span>${formatMoney(data.costs.totalGeneral)}</span></div>
-          </div>
-        </div>
-      </body>
-    </html>
-  `);
-
-  pdfWindow.document.close();
+</div><!-- /app -->
+
+<!-- MODAL CHANTIERS -->
+<div class="modal-backdrop" id="savedModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Mes chantiers</h3>
+      <button class="btn btn-dim btn-sm" id="btnCloseModal">Fermer</button>
+    </div>
+    <div id="savedList"></div>
+  </div>
+</div>
+
+<!-- CONFIRM SUPPRESSION -->
+<div class="confirm-backdrop" id="confirmBackdrop">
+  <div class="confirm-box">
+    <div class="cb-icon">🗑</div>
+    <h3>Supprimer ?</h3>
+    <p>Ce chantier sera définitivement supprimé. Cette action est irréversible.</p>
+    <div class="cb-actions">
+      <button class="btn btn-dim" id="confirmCancel">Annuler</button>
+      <button class="btn btn-danger" id="confirmOk">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   CONSTANTES
+════════════════════════════════════════ */
+const H_PAR_JOUR = 8;
+const SURF_WARN   = 5000;
+
+const KEYS = {
+  settings: "ard_settings_v12",
+  projects: "ard_projects_v12"
+};
+
+const DEFAULT_SETTINGS = {
+  prixAcier:0.8, prixGrillage:6, prixBeton:13,
+  prixBaguette:0.36, prixAgrafe:0.015, prixVernis:8,
+  ratioAcier:12, ratioGrillage:1.1, ratioBeton:3.4,
+  ratioBaguette:6, ratioAgrafe:50, ratioVernis:0.2
+};
+
+const SETTING_IDS = Object.keys(DEFAULT_SETTINGS);
+
+/* ════════════════════════════════════════
+   ÉTAT
+════════════════════════════════════════ */
+const state = {
+  qualite:   "moyenne",
+  conditions:"normal",
+  lastResult:null,
+  betonManuel:false,
+  pendingDel:null
+};
+
+/* ════════════════════════════════════════
+   RÉFÉRENCES DOM
+════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+
+const ui = {
+  viewForm:   $("viewForm"),
+  viewResult: $("viewResults"),
+  nom:        $("chantierNom"),
+  moins3:     $("surfaceMoins3"),
+  plus3:      $("surfacePlus3"),
+  route:      $("heuresRoute"),
+  kpiSurface: $("kpiSurface"),
+  kpiProd:    $("kpiProd"),
+  prevDays:   $("previewDays"),
+  prevWeeks:  $("previewWeeks"),
+  totDays:    $("totalDays"),
+  totWeeks:   $("totalWeeks"),
+  savedTag:   $("savedTag"),
+  formAlert:  $("formAlert"),
+  alertList:  $("formAlertList"),
+  ratioBeton: $("ratioBeton"),
+  savedModal: $("savedModal"),
+  savedList:  $("savedList"),
+  confirmBd:  $("confirmBackdrop")
+};
+
+/* ════════════════════════════════════════
+   UTILITAIRES
+════════════════════════════════════════ */
+function toNum(v){ return Number(String(v||0).replace(",",".")) || 0 }
+
+function fmtMoney(v){
+  return new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(v||0);
 }
 
+function fmtNum(v, d=1){
+  const n = Number(v||0);
+  return Number.isInteger(n) ? String(n) : n.toFixed(d).replace(/\.0+$/,"").replace(".",",");
+}
 
-    function resetForm(){
-      els.chantierNom.value = "";
-      els.surfaceMoins3.value = 0;
-      els.surfacePlus3.value = 0;
-      els.heuresRoute.value = "";
-      document.getElementById("mainOeuvre").value = "";
-      document.getElementById("logement").value = "";
-      document.getElementById("locationMateriel").value = "";
-      state.qualite = "moyenne";
-      state.conditions = "normal";
-      state.betonManuel = false;
-      syncChoiceButtons();
-      applyDefaultBetonRatio(true);
-      updateLivePreview();
-      showForm();
+function fmtWeeks(days){
+  const d = Number(days||0);
+  const w = Math.floor(d/5);
+  const r = d - w*5;
+  if(w<=0) return `${fmtNum(d)} jour${d>1?"s":""}`;
+  if(r<=0.05) return `${w} semaine${w>1?"s":""}`;
+  return `${w} sem. + ${fmtNum(r)} jour${r>1?"s":""}`;
+}
+
+function escHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[c]);
+}
+
+function dateFr(){ return new Date().toLocaleDateString("fr-FR") }
+
+/* ════════════════════════════════════════
+   SETTINGS
+════════════════════════════════════════ */
+function getSettings(){
+  const s = JSON.parse(localStorage.getItem(KEYS.settings)||"null");
+  return {...DEFAULT_SETTINGS,...(s||{})};
+}
+
+function saveSettings(){
+  const p={};
+  SETTING_IDS.forEach(id => p[id]=toNum($(id).value));
+  localStorage.setItem(KEYS.settings, JSON.stringify(p));
+}
+
+function applySettings(){
+  const s = getSettings();
+  SETTING_IDS.forEach(id => $(id).value = s[id]);
+}
+
+function betonDefault(){ return state.qualite==="superieure" ? 3.8 : 3.4 }
+
+function applyBetonRatio(force=false){
+  if(!state.betonManuel || force){
+    ui.ratioBeton.value = betonDefault();
+    saveSettings();
+  }
+}
+
+/* ════════════════════════════════════════
+   CALCULS
+════════════════════════════════════════ */
+function productivite(){
+  const q = state.qualite, c = state.conditions;
+  if(q==="superieure" && c==="difficile") return 8;
+  if(q==="superieure" && c==="normal")   return 10;
+  if(q==="moyenne"    && c==="difficile") return 10;
+  return 12;
+}
+
+function getSurface(){
+  return toNum(ui.moins3.value) + toNum(ui.plus3.value);
+}
+
+function updatePreview(){
+  const surf  = getSurface();
+  const prod  = productivite();
+  const chan  = surf / prod;
+  const route = toNum(ui.route.value) > 0 ? toNum(ui.route.value)/H_PAR_JOUR : 0;
+  const total = chan + route;
+
+  ui.kpiSurface.innerHTML = `${fmtNum(surf)}<span class="kpi-unit">m²</span>`;
+  ui.kpiProd.innerHTML    = `${prod}<span class="kpi-unit">m²/j</span>`;
+  ui.prevDays.textContent  = fmtNum(chan);
+  ui.prevWeeks.textContent = fmtWeeks(chan);
+  ui.totDays.innerHTML     = `${fmtNum(total)}<span style="font-size:20px;font-weight:700;color:var(--text2);margin-left:8px">j</span>`;
+  ui.totWeeks.textContent  = fmtWeeks(total);
+}
+
+function computeAll(){
+  const nom    = ui.nom.value.trim();
+  const m3     = toNum(ui.moins3.value);
+  const p3     = toNum(ui.plus3.value);
+  const surf   = m3 + p3;
+  const hRoute = toNum(ui.route.value);
+  const s      = getSettings();
+  const prod   = productivite();
+
+  const tChan  = surf/prod;
+  const tRoute = hRoute>0 ? hRoute/H_PAR_JOUR : 0;
+  const tTotal = tChan+tRoute;
+  const tAr    = Math.ceil(tTotal);
+
+  const qAcier   = surf*s.ratioAcier;
+  const qGrill   = surf*s.ratioGrillage;
+  const qBeton   = surf*s.ratioBeton;
+  const qBag     = surf*s.ratioBaguette;
+  const qAg      = surf*s.ratioAgrafe;
+  const qVer     = surf*s.ratioVernis;
+
+  const cAcier   = qAcier*s.prixAcier;
+  const cGrill   = qGrill*s.prixGrillage;
+  const cBeton   = qBeton*s.prixBeton;
+  const cBag     = qBag*s.prixBaguette;
+  const cAg      = qAg*s.prixAgrafe;
+  const cVer     = qVer*s.prixVernis;
+  const totMat   = cAcier+cGrill+cBeton+cBag+cAg+cVer;
+
+  const mo       = toNum($("mainOeuvre").value);
+  const log      = toNum($("logement").value);
+  const locm     = toNum($("locationMateriel").value);
+  const totGen   = totMat+mo+log+locm;
+
+  return {
+    nom, date:dateFr(),
+    qualite:state.qualite, conditions:state.conditions,
+    moins3:m3, plus3:p3, surf, hRoute,
+    tChan, tRoute, tTotal, tAr,
+    qty:{acier:qAcier,grillage:qGrill,beton:qBeton,baguette:qBag,agrafe:qAg,vernis:qVer},
+    cost:{acier:cAcier,grillage:cGrill,beton:cBeton,baguette:cBag,agrafe:cAg,vernis:cVer,
+          totMat, mo, log, locm, totGen}
+  };
+}
+
+/* ════════════════════════════════════════
+   VALIDATION
+════════════════════════════════════════ */
+function setMsg(fieldId, inputEl, type, text){
+  const field = $(fieldId);
+  const old   = field.querySelector(".field-msg");
+  if(old) old.remove();
+  inputEl.classList.remove("is-error","is-warn","is-ok");
+  if(!type) return;
+  inputEl.classList.add(`is-${type}`);
+  const icons = {error:"✕",warn:"⚠",info:"✓"};
+  const div = document.createElement("div");
+  div.className = `field-msg ${type}`;
+  div.innerHTML = `<span>${icons[type]}</span><span>${text}</span>`;
+  inputEl.insertAdjacentElement("afterend", div);
+}
+
+function clearMsg(fieldId, inputEl){
+  setMsg(fieldId, inputEl, null, "");
+}
+
+function validate(){
+  const errors = [];
+  let ok = true;
+
+  // Nom (avertissement non bloquant)
+  const nom = ui.nom.value.trim();
+  if(!nom){
+    setMsg("fNom", ui.nom, "warn", "Sans nom, le chantier ne sera pas enregistré.");
+  } else {
+    clearMsg("fNom", ui.nom);
+    ui.nom.classList.add("is-ok");
+  }
+
+  // Surfaces
+  const m3 = toNum(ui.moins3.value);
+  const p3 = toNum(ui.plus3.value);
+  const st = m3+p3;
+
+  if(m3<0){
+    setMsg("fMoins3",ui.moins3,"error","Surface négative impossible.");
+    errors.push("Surface décor < 3 m : valeur négative."); ok=false;
+  } else { clearMsg("fMoins3",ui.moins3); if(m3>0) ui.moins3.classList.add("is-ok"); }
+
+  if(p3<0){
+    setMsg("fPlus3",ui.plus3,"error","Surface négative impossible.");
+    errors.push("Surface décor > 3 m : valeur négative."); ok=false;
+  } else { clearMsg("fPlus3",ui.plus3); if(p3>0) ui.plus3.classList.add("is-ok"); }
+
+  if(st===0 && ok){
+    setMsg("fMoins3",ui.moins3,"error","Renseigne au moins une surface pour calculer.");
+    errors.push("Aucune surface saisie — au moins un champ requis."); ok=false;
+  }
+
+  if(st>SURF_WARN && ok){
+    setMsg("fMoins3",ui.moins3,"warn",`${fmtNum(st)} m² — surface très importante, vérifier.`);
+  }
+
+  // Route
+  const hr = toNum(ui.route.value);
+  if(hr<0){
+    setMsg("fRoute",ui.route,"error","Heures de route négatives impossibles.");
+    errors.push("Heures de route : valeur négative."); ok=false;
+  } else if(hr>300){
+    setMsg("fRoute",ui.route,"warn",`${hr} h de route — vérifier la valeur.`);
+  } else if(hr>0){
+    clearMsg("fRoute",ui.route); ui.route.classList.add("is-ok");
+  } else {
+    clearMsg("fRoute",ui.route);
+  }
+
+  // Frais optionnels (négatifs bloquants)
+  [
+    {id:"mainOeuvre",    fid:"fMO",    label:"Main-d'œuvre"},
+    {id:"logement",      fid:"fLog",   label:"Logement"},
+    {id:"locationMateriel",fid:"fLocMat",label:"Location matériel"}
+  ].forEach(({id,fid,label})=>{
+    const v=toNum($(id).value), el=$(id);
+    if(v<0){
+      setMsg(fid,el,"error",`${label} : valeur négative impossible.`);
+      errors.push(`${label} : valeur négative.`); ok=false;
+    } else {
+      clearMsg(fid,el);
+      if(v>0) el.classList.add("is-ok");
     }
+  });
 
-    function escapeHtml(str){
-      return String(str)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
+  return {ok, errors};
+}
 
-    document.querySelectorAll(".choice").forEach(btn => {
-      btn.addEventListener("click", () => {
-        state[btn.dataset.group] = btn.dataset.value;
-        syncChoiceButtons();
-        if (btn.dataset.group === "qualite" && !state.betonManuel){
-          applyDefaultBetonRatio(true);
-        }
-        updateLivePreview();
-      });
-    });
+function showAlert(errors){
+  if(!errors.length){ ui.formAlert.classList.remove("show"); return; }
+  ui.alertList.innerHTML = errors.map(e=>`<li>${escHtml(e)}</li>`).join("");
+  ui.formAlert.classList.add("show");
+  ui.formAlert.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
 
-    [els.surfaceMoins3, els.surfacePlus3, els.heuresRoute].forEach(input => {
-      input.addEventListener("input", updateLivePreview);
-    });
+function clearAllMsgs(){
+  document.querySelectorAll(".field-msg").forEach(e=>e.remove());
+  document.querySelectorAll(".is-error,.is-warn,.is-ok").forEach(e=>
+    e.classList.remove("is-error","is-warn","is-ok"));
+  ui.formAlert.classList.remove("show");
+}
 
-    settingInputs.forEach(id => {
-      const input = document.getElementById(id);
-      input.addEventListener("input", () => {
-        if (id === "ratioBeton") state.betonManuel = true;
-        saveSettings();
-      });
-      input.addEventListener("focus", e => e.target.select());
-      input.addEventListener("click", e => e.target.select());
-    });
+function shake(el){
+  el.classList.remove("shake"); void el.offsetWidth;
+  el.classList.add("shake");
+  el.addEventListener("animationend",()=>el.classList.remove("shake"),{once:true});
+}
 
-    ["mainOeuvre","logement","locationMateriel"].forEach(id => {
-      const input = document.getElementById(id);
-      input.addEventListener("focus", e => e.target.select());
-      input.addEventListener("click", e => e.target.select());
-    });
+/* ════════════════════════════════════════
+   RÉSULTATS
+════════════════════════════════════════ */
+function fillResults(d){
+  state.lastResult = d;
+  $("rNom").textContent     = d.nom||"Chantier sans nom";
+  $("rMoins3").textContent  = `${fmtNum(d.moins3)} m²`;
+  $("rPlus3").textContent   = `${fmtNum(d.plus3)} m²`;
+  $("rSurfTot").textContent = `${fmtNum(d.surf)} m²`;
+  $("rQualite").textContent = d.qualite==="superieure"?"Supérieure":"Moyenne";
+  $("rConditions").textContent = d.conditions==="difficile"?"Difficile":"Normal";
 
-    els.toggleCosts.addEventListener("click", () => {
-      const open = els.costsPanel.classList.toggle("open");
-      els.toggleCostsChevron.textContent = open ? "▴" : "▾";
-    });
+  $("qAcier").textContent   = fmtNum(d.qty.acier);
+  $("qGrillage").textContent= fmtNum(d.qty.grillage);
+  $("qBeton").textContent   = fmtNum(d.qty.beton);
+  $("qBaguette").textContent= fmtNum(d.qty.baguette);
+  $("qAgrafe").textContent  = fmtNum(d.qty.agrafe,0);
+  $("qVernis").textContent  = fmtNum(d.qty.vernis);
 
-    els.btnCalculer.addEventListener("click", () => {
-      const data = computeAll();
-      fillResults(data);
-      saveCurrentProjectIfNamed(data);
-      showResults();
-    });
+  $("cAcier").textContent   = fmtMoney(d.cost.acier);
+  $("cGrillage").textContent= fmtMoney(d.cost.grillage);
+  $("cBeton").textContent   = fmtMoney(d.cost.beton);
+  $("cBaguette").textContent= fmtMoney(d.cost.baguette);
+  $("cAgrafe").textContent  = fmtMoney(d.cost.agrafe);
+  $("cVernis").textContent  = fmtMoney(d.cost.vernis);
+  $("rTotMat").textContent  = fmtMoney(d.cost.totMat);
 
-    els.btnBack.addEventListener("click", showForm);
-    els.btnModifier.addEventListener("click", showForm);
-    els.btnNew.addEventListener("click", resetForm);
+  $("rChantierJ").textContent  = `${fmtNum(d.tChan)} j`;
+  $("rChantierSem").textContent= fmtWeeks(d.tChan);
+  $("rRouteJ").textContent     = `${fmtNum(d.tRoute)} j`;
+  $("rTotalJ").textContent     = `${fmtNum(d.tTotal)} j`;
+  $("rTotalSem").textContent   = fmtWeeks(d.tTotal);
+  $("rArrondi").textContent    = fmtNum(d.tAr,0);
 
-    els.btnWhatsapp.addEventListener("click", () => {
-      if (!state.lastResults) return;
-      const text = buildWhatsappText(state.lastResults);
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-    });
+  $("rowRoute").classList.toggle("hidden", d.tRoute<=0);
 
-    els.btnPdf.addEventListener("click", openPdfWindow);
+  $("sMat").textContent = fmtMoney(d.cost.totMat);
+  $("sGeneral").textContent = fmtMoney(d.cost.totGen);
 
-    els.btnSavedProjects.addEventListener("click", () => {
-      renderSavedProjects();
-      els.savedProjectsModal.classList.add("show");
-    });
+  const setRow=(rowId,valId,v)=>{
+    $(rowId).classList.toggle("hidden",v<=0);
+    if(v>0) $(valId).textContent=fmtMoney(v);
+  };
+  setRow("rowMO","sMO",d.cost.mo);
+  setRow("rowLog","sLog",d.cost.log);
+  setRow("rowLocMat","sLocMat",d.cost.locm);
+}
 
-    els.btnCloseProjects.addEventListener("click", closeSavedProjects);
-    els.savedProjectsModal.addEventListener("click", (e) => {
-      if (e.target === els.savedProjectsModal) closeSavedProjects();
-    });
+/* ════════════════════════════════════════
+   PROJETS ENREGISTRÉS
+════════════════════════════════════════ */
+function getProjects(){ return JSON.parse(localStorage.getItem(KEYS.projects)||"[]") }
+function setProjects(p){ localStorage.setItem(KEYS.projects,JSON.stringify(p)) }
 
-    applySettingsToInputs();
-    syncChoiceButtons();
-    applyDefaultBetonRatio(false);
-    updateLivePreview();
-    renderSavedProjects();
-  </script>
+function saveProject(data){
+  if(!data.nom) return;
+  const list = getProjects();
+  const idx  = list.findIndex(p=>p.nom.toLowerCase()===data.nom.toLowerCase());
+  const payload = {...data, savedAt:new Date().toISOString()};
+  if(idx>=0){ list[idx]=payload; showTag("✓ Mis à jour") }
+  else       { list.unshift(payload); showTag("✓ Enregistré") }
+  setProjects(list);
+  renderProjects();
+}
+
+function showTag(msg){
+  ui.savedTag.textContent = msg;
+  ui.savedTag.classList.add("show");
+  clearTimeout(showTag._t);
+  showTag._t = setTimeout(()=>ui.savedTag.classList.remove("show"),2200);
+}
+
+function renderProjects(){
+  const list = getProjects();
+  if(!list.length){
+    ui.savedList.innerHTML=`<div class="empty-state">Aucun chantier enregistré</div>`;
+    return;
+  }
+  ui.savedList.innerHTML = list.map((p,i)=>`
+    <div class="saved-item">
+      <div>
+        <div class="si-name">${escHtml(p.nom||"Sans nom")}</div>
+        <div class="si-meta">
+          ${new Date(p.savedAt).toLocaleString("fr-FR")} &middot;
+          ${fmtNum(p.surf)} m² &middot; ${fmtNum(p.tAr,0)} jours
+        </div>
+      </div>
+      <div class="saved-item-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openProject(${i})">Ouvrir</button>
+        <button class="btn btn-danger btn-sm" onclick="askDel(${i})">✕</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+window.openProject = function(i){
+  const p = getProjects()[i]; if(!p) return;
+  ui.nom.value    = p.nom||"";
+  ui.moins3.value = p.moins3??0;
+  ui.plus3.value  = p.plus3??0;
+  ui.route.value  = p.hRoute||"";
+  state.qualite   = p.qualite||"moyenne";
+  state.conditions= p.conditions||"normal";
+  syncChoices();
+  $("mainOeuvre").value    = p.cost?.mo||"";
+  $("logement").value      = p.cost?.log||"";
+  $("locationMateriel").value = p.cost?.locm||"";
+  clearAllMsgs();
+  updatePreview();
+  fillResults(p);
+  closeModal();
+  showResults();
+};
+
+window.askDel = function(i){
+  state.pendingDel = i;
+  ui.confirmBd.classList.add("show");
+};
+
+function execDel(){
+  if(state.pendingDel===null) return;
+  const list = getProjects();
+  list.splice(state.pendingDel,1);
+  setProjects(list);
+  state.pendingDel=null;
+  ui.confirmBd.classList.remove("show");
+  renderProjects();
+}
+
+function closeModal(){ ui.savedModal.classList.remove("show") }
+
+/* ════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════ */
+function showResults(){
+  ui.viewForm.classList.add("hidden");
+  ui.viewResult.classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function showForm(){
+  ui.viewResult.classList.add("hidden");
+  ui.viewForm.classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function syncChoices(){
+  document.querySelectorAll(".choice").forEach(btn=>{
+    const active = state[btn.dataset.group]===btn.dataset.value;
+    btn.classList.toggle("active",active);
+  });
+}
+
+function resetForm(){
+  ui.nom.value=""; ui.moins3.value=0; ui.plus3.value=0; ui.route.value="";
+  $("mainOeuvre").value=""; $("logement").value=""; $("locationMateriel").value="";
+  state.qualite="moyenne"; state.conditions="normal"; state.betonManuel=false;
+  clearAllMsgs(); syncChoices(); applyBetonRatio(true); updatePreview(); showForm();
+}
+
+/* ════════════════════════════════════════
+   WHATSAPP & PDF
+════════════════════════════════════════ */
+function buildWA(d){
+  const lines=[];
+  lines.push(`CHANTIER ARD — ${d.nom||"Sans nom"}`);
+  lines.push(`Date : ${d.date}`);
+  lines.push(`\nSURFACES :`);
+  lines.push(`  Décor < 3 m : ${fmtNum(d.moins3)} m²`);
+  lines.push(`  Décor > 3 m : ${fmtNum(d.plus3)} m²`);
+  lines.push(`  Total      : ${fmtNum(d.surf)} m²`);
+  lines.push(`\nTEMPS :`);
+  lines.push(`  Chantier   : ${fmtNum(d.tChan)} j (${fmtWeeks(d.tChan)})`);
+  if(d.tRoute>0) lines.push(`  Route      : ${fmtNum(d.tRoute)} j`);
+  lines.push(`  Total      : ${fmtNum(d.tTotal)} j (${fmtWeeks(d.tTotal)})`);
+  lines.push(`  ► Arrondi  : ${fmtNum(d.tAr,0)} jours`);
+  lines.push(`\nMATÉRIAUX :`);
+  lines.push(`  Acier    : ${fmtNum(d.qty.acier)} ml`);
+  lines.push(`  Grillage : ${fmtNum(d.qty.grillage)} m²`);
+  lines.push(`  Béton    : ${fmtNum(d.qty.beton)} sacs`);
+  lines.push(`  Baguettes: ${fmtNum(d.qty.baguette,0)} u`);
+  lines.push(`  Agrafes  : ${fmtNum(d.qty.agrafe,0)} u`);
+  lines.push(`  Vernis   : ${fmtNum(d.qty.vernis)} L`);
+  lines.push(`\nCOÛTS :`);
+  lines.push(`  Matériaux  : ${fmtMoney(d.cost.totMat)}`);
+  if(d.cost.mo>0)   lines.push(`  Main-d'œuvre: ${fmtMoney(d.cost.mo)}`);
+  if(d.cost.log>0)  lines.push(`  Logement    : ${fmtMoney(d.cost.log)}`);
+  if(d.cost.locm>0) lines.push(`  Loc. mat.   : ${fmtMoney(d.cost.locm)}`);
+  lines.push(`  TOTAL       : ${fmtMoney(d.cost.totGen)}`);
+  return lines.join("\n");
+}
+
+function openPdf(){
+  if(!state.lastResult) return;
+  const d   = state.lastResult;
+  const win = window.open("","_blank","width=1050,height=900");
+  if(!win){ alert("Fenêtre PDF bloquée par le navigateur."); return; }
+
+  const rowR  = d.tRoute>0 ? `<tr><td>Temps route</td><td><strong>${fmtNum(d.tRoute)} j</strong></td></tr>` : "";
+  const rowMO = d.cost.mo>0 ? `<tr><td>Main-d'œuvre</td><td>${fmtMoney(d.cost.mo)}</td></tr>` : "";
+  const rowL  = d.cost.log>0 ? `<tr><td>Logement</td><td>${fmtMoney(d.cost.log)}</td></tr>` : "";
+  const rowLM = d.cost.locm>0 ? `<tr><td>Location matériel</td><td>${fmtMoney(d.cost.locm)}</td></tr>` : "";
+
+  win.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+  <title>Calcul ARD — ${escHtml(d.nom||"Chantier")}</title>
+  <style>
+    body{font-family:Arial,sans-serif;color:#1a1a1a;background:#f5f5f5;margin:0}
+    .bar{position:sticky;top:0;background:#fff;border-bottom:1px solid #ddd;padding:12px 20px;
+         display:flex;justify-content:space-between;align-items:center;z-index:5}
+    .bar h2{margin:0;font-size:18px;font-weight:800}
+    .bar button{background:#D4813A;color:#fff;border:none;border-radius:10px;
+                padding:10px 18px;font-weight:700;font-size:14px;cursor:pointer}
+    .sheet{max-width:920px;margin:24px auto;background:#fff;
+           box-shadow:0 4px 24px rgba(0,0,0,.1);padding:30px}
+    h1{font-size:32px;font-weight:900;margin:0 0 4px}
+    .sub{color:#888;font-size:14px;margin:0 0 24px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+    .box{border:1px solid #e0e0e0;border-radius:12px;padding:16px}
+    .box h3{margin:0 0 12px;font-size:13px;letter-spacing:.16em;
+             text-transform:uppercase;color:#888;font-weight:700}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    tr{border-bottom:1px solid #f0f0f0}
+    tr:last-child{border-bottom:none}
+    td{padding:7px 4px}
+    td:last-child{text-align:right;font-weight:700}
+    .total-row{background:#f8f5f0;font-weight:800;font-size:16px}
+    .total-row td{padding:12px 8px}
+    .final-box{background:#D4813A;color:#fff;border-radius:14px;
+               padding:24px;text-align:center;margin-top:20px}
+    .final-box .fl{font-size:13px;letter-spacing:.16em;text-transform:uppercase;opacity:.9;margin-bottom:8px}
+    .final-box .fv{font-size:52px;font-weight:900;line-height:1}
+    .final-box .fu{font-size:22px;font-weight:700;margin-left:8px;opacity:.85}
+    @media print{.bar{display:none}.sheet{box-shadow:none;margin:0;padding:0}}
+  </style></head><body>
+  <div class="bar"><h2>Calcul ARD · PDF</h2><button onclick="window.print()">🖨 Imprimer / Enregistrer PDF</button></div>
+  <div class="sheet">
+    <h1>Calcul ARD</h1>
+    <p class="sub">Document chantier · ${d.date}</p>
+    <div class="grid">
+      <div class="box"><h3>Résumé chantier</h3>
+        <table>
+          <tr><td>Chantier</td><td>${escHtml(d.nom||"—")}</td></tr>
+          <tr><td>Décor &lt; 3 m</td><td>${fmtNum(d.moins3)} m²</td></tr>
+          <tr><td>Décor &gt; 3 m</td><td>${fmtNum(d.plus3)} m²</td></tr>
+          <tr><td>Surface totale</td><td>${fmtNum(d.surf)} m²</td></tr>
+          <tr><td>Qualité</td><td>${d.qualite==="superieure"?"Supérieure":"Moyenne"}</td></tr>
+          <tr><td>Conditions</td><td>${d.conditions==="difficile"?"Difficile":"Normal"}</td></tr>
+        </table>
+      </div>
+      <div class="box"><h3>Temps estimatif</h3>
+        <table>
+          <tr><td>Chantier</td><td>${fmtNum(d.tChan)} j · ${fmtWeeks(d.tChan)}</td></tr>
+          ${rowR}
+          <tr><td>Total</td><td>${fmtNum(d.tTotal)} j · ${fmtWeeks(d.tTotal)}</td></tr>
+          <tr class="total-row"><td>Total arrondi</td><td>${fmtNum(d.tAr,0)} jours</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="box" style="margin-bottom:20px"><h3>Matériaux</h3>
+      <table>
+        <tr><td>Acier 7 mm</td><td>${fmtNum(d.qty.acier)} ml</td><td>${fmtMoney(d.cost.acier)}</td></tr>
+        <tr><td>Grillage</td><td>${fmtNum(d.qty.grillage)} m²</td><td>${fmtMoney(d.cost.grillage)}</td></tr>
+        <tr><td>Béton</td><td>${fmtNum(d.qty.beton)} sacs</td><td>${fmtMoney(d.cost.beton)}</td></tr>
+        <tr><td>Baguettes</td><td>${fmtNum(d.qty.baguette,0)} u</td><td>${fmtMoney(d.cost.baguette)}</td></tr>
+        <tr><td>Agrafes</td><td>${fmtNum(d.qty.agrafe,0)} u</td><td>${fmtMoney(d.cost.agrafe)}</td></tr>
+        <tr><td>Vernis</td><td>${fmtNum(d.qty.vernis)} L</td><td>${fmtMoney(d.cost.vernis)}</td></tr>
+        <tr><td>Patines</td><td colspan="2">Prévoir min. 4 couleurs</td></tr>
+        <tr class="total-row"><td colspan="2">Total matériaux</td><td>${fmtMoney(d.cost.totMat)}</td></tr>
+      </table>
+    </div>
+    <div class="box"><h3>Coûts</h3>
+      <table>
+        <tr><td>Total matériaux</td><td>${fmtMoney(d.cost.totMat)}</td></tr>
+        ${rowMO}${rowL}${rowLM}
+        <tr class="total-row"><td>Total général</td><td>${fmtMoney(d.cost.totGen)}</td></tr>
+      </table>
+    </div>
+    <div class="final-box">
+      <div class="fl">Total arrondi</div>
+      <div><span class="fv">${fmtNum(d.tAr,0)}</span><span class="fu">jours</span></div>
+    </div>
+  </div></body></html>`);
+  win.document.close();
+}
+
+/* ════════════════════════════════════════
+   EVENTS
+════════════════════════════════════════ */
+// Choix qualité / conditions
+document.querySelectorAll(".choice").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    state[btn.dataset.group] = btn.dataset.value;
+    syncChoices();
+    if(btn.dataset.group==="qualite" && !state.betonManuel) applyBetonRatio(true);
+    updatePreview();
+  });
+});
+
+// Preview en temps réel
+[ui.moins3, ui.plus3, ui.route].forEach(inp=>{
+  inp.addEventListener("input",()=>{
+    updatePreview();
+    // Effacer erreur dès saisie
+    const map={surfaceMoins3:"fMoins3",surfacePlus3:"fPlus3",heuresRoute:"fRoute"};
+    if(map[inp.id]){ clearMsg(map[inp.id],inp); ui.formAlert.classList.remove("show") }
+  });
+});
+
+// Champs optionnels
+["mainOeuvre","logement","locationMateriel"].forEach(id=>{
+  const el=$(id);
+  const fmap={mainOeuvre:"fMO",logement:"fLog",locationMateriel:"fLocMat"};
+  el.addEventListener("input",()=>{ clearMsg(fmap[id],el); ui.formAlert.classList.remove("show") });
+  el.addEventListener("focus",e=>e.target.select());
+  el.addEventListener("click",e=>e.target.select());
+});
+
+// Nom
+ui.nom.addEventListener("input",()=>clearMsg("fNom",ui.nom));
+
+// Settings
+SETTING_IDS.forEach(id=>{
+  const el=$(id);
+  el.addEventListener("input",()=>{ if(id==="ratioBeton") state.betonManuel=true; saveSettings() });
+  el.addEventListener("focus",e=>e.target.select());
+  el.addEventListener("click",e=>e.target.select());
+});
+
+// Accordion
+$("toggleCosts").addEventListener("click",()=>{
+  const panel=$("costsPanel"), ch=$("costsChevron");
+  const open=panel.classList.toggle("open");
+  ch.classList.toggle("open",open);
+});
+
+// Calculer
+$("btnCalc").addEventListener("click",()=>{
+  const {ok, errors} = validate();
+  if(!ok){ showAlert(errors); shake($("btnCalc")); return; }
+  ui.formAlert.classList.remove("show");
+  const data = computeAll();
+  fillResults(data);
+  saveProject(data);
+  showResults();
+});
+
+$("btnBack").addEventListener("click", showForm);
+$("btnModifier").addEventListener("click", showForm);
+$("btnNew").addEventListener("click", resetForm);
+
+$("btnWhatsapp").addEventListener("click",()=>{
+  if(!state.lastResult) return;
+  window.open(`https://wa.me/?text=${encodeURIComponent(buildWA(state.lastResult))}`,"_blank");
+});
+
+$("btnPdf").addEventListener("click", openPdf);
+
+$("btnSaved").addEventListener("click",()=>{
+  renderProjects();
+  ui.savedModal.classList.add("show");
+});
+
+$("btnCloseModal").addEventListener("click", closeModal);
+ui.savedModal.addEventListener("click",e=>{ if(e.target===ui.savedModal) closeModal() });
+
+$("confirmCancel").addEventListener("click",()=>{
+  state.pendingDel=null; ui.confirmBd.classList.remove("show");
+});
+$("confirmOk").addEventListener("click", execDel);
+ui.confirmBd.addEventListener("click",e=>{
+  if(e.target===ui.confirmBd){ state.pendingDel=null; ui.confirmBd.classList.remove("show") }
+});
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+applySettings();
+syncChoices();
+applyBetonRatio(false);
+updatePreview();
+renderProjects();
+</script>
 </body>
 </html>
