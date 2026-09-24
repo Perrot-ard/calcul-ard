@@ -318,12 +318,13 @@
     /* ══ CHOICE BUTTONS ══ */
     .choices{
       display:grid;
-      grid-template-columns:1fr 1fr;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
       gap:12px;
       margin-bottom:4px;
     }
 
     .choice{
+      min-width:0;
       padding:16px 12px;
       font-family:var(--font-head);
       font-size:20px;
@@ -1154,18 +1155,18 @@
 
       <div class="field" id="fNom">
         <label for="chantierNom">Nom du chantier</label>
-        <input type="text" id="chantierNom" placeholder="Ex : Villa Bretagne · Aquarium Berlin · Client X"/>
+        <input type="text" id="chantierNom" maxlength="200" placeholder="Ex : Villa Bretagne · Aquarium Berlin · Client X"/>
         <div class="saved-tag" id="savedTag">✓ Enregistré</div>
       </div>
 
       <div class="grid-2">
         <div class="field" id="fMoins3">
           <label for="surfaceMoins3">Décor &lt; 3 m (m²)</label>
-          <input class="num-xl" type="number" min="0" step="0.1" id="surfaceMoins3" value="0"/>
+          <input class="num-xl" type="text" inputmode="decimal" min="0" step="0.1" id="surfaceMoins3" value="0"/>
         </div>
         <div class="field" id="fPlus3">
           <label for="surfacePlus3">Décor &gt; 3 m (m²)</label>
-          <input class="num-xl" type="number" min="0" step="0.1" id="surfacePlus3" value="0"/>
+          <input class="num-xl" type="text" inputmode="decimal" min="0" step="0.1" id="surfacePlus3" value="0"/>
         </div>
       </div>
 
@@ -1209,7 +1210,7 @@
 
       <div class="field" id="fRoute">
         <label for="heuresRoute">Heures de route (total aller + retour)</label>
-        <input type="number" min="0" step="0.5" id="heuresRoute" placeholder="Ex : 4, 8, 12"/>
+        <input type="text" inputmode="decimal" min="0" step="0.5" id="heuresRoute" placeholder="Ex : 4, 8, 12"/>
         <div class="help-text">Additionner tous les trajets prévus.</div>
       </div>
 
@@ -1229,16 +1230,16 @@
       <div class="grid-3">
         <div class="field" id="fMO">
           <label for="mainOeuvre">Main-d'œuvre (€)</label>
-          <input type="number" step="1" id="mainOeuvre" placeholder="—"/>
+          <input type="text" inputmode="decimal" step="1" id="mainOeuvre" placeholder="—"/>
           <div class="mini-note">Équipe 3–4 personnes</div>
         </div>
         <div class="field" id="fLog">
           <label for="logement">Logement (€)</label>
-          <input type="number" step="1" id="logement" placeholder="—"/>
+          <input type="text" inputmode="decimal" step="1" id="logement" placeholder="—"/>
         </div>
         <div class="field" id="fLocMat">
           <label for="locationMateriel">Location matériel (€)</label>
-          <input type="number" step="1" id="locationMateriel" placeholder="—"/>
+          <input type="text" inputmode="decimal" step="1" id="locationMateriel" placeholder="—"/>
           <div class="mini-note">Nacelle, échafaudage…</div>
         </div>
       </div>
@@ -1250,7 +1251,7 @@
 
       <div class="field" id="fMarge" style="max-width:260px">
         <label for="margePct">Marge souhaitée (%)</label>
-        <input type="number" min="0" step="0.5" id="margePct" placeholder="Ex : 30"/>
+        <input type="text" inputmode="decimal" min="0" step="0.5" id="margePct" placeholder="Ex : 30"/>
         <div class="help-text">Appliquée sur le total général (matériaux + tous frais).</div>
       </div>
 
@@ -1279,34 +1280,34 @@
         <div class="annexe-card">
           <div class="annexe-title">Prix matériaux</div>
           <div class="grid-2">
-            <div class="field">
+            <div class="field" id="fPrixAcier">
               <label for="prixAcier">Acier (€ / ml)</label>
-              <input type="number" step="0.001" id="prixAcier" value="0.8"/>
+              <input type="text" inputmode="decimal" step="0.001" id="prixAcier" value="0.8"/>
               <div class="mini-note">Base : 0,80 € / ml</div>
             </div>
-            <div class="field">
+            <div class="field" id="fPrixGrillage">
               <label for="prixGrillage">Grillage (€ / m²)</label>
-              <input type="number" step="0.001" id="prixGrillage" value="6"/>
+              <input type="text" inputmode="decimal" step="0.001" id="prixGrillage" value="6"/>
               <div class="mini-note">Base : 6,00 € / m²</div>
             </div>
-            <div class="field">
+            <div class="field" id="fPrixBeton">
               <label for="prixBeton">Béton sac 25 kg (€)</label>
-              <input type="number" step="0.001" id="prixBeton" value="13"/>
+              <input type="text" inputmode="decimal" step="0.001" id="prixBeton" value="13"/>
               <div class="mini-note">Base : 13,00 € / sac</div>
             </div>
-            <div class="field">
+            <div class="field" id="fPrixBaguette">
               <label for="prixBaguette">Baguette (€ / u)</label>
-              <input type="number" step="0.001" id="prixBaguette" value="0.36"/>
+              <input type="text" inputmode="decimal" step="0.001" id="prixBaguette" value="0.36"/>
               <div class="mini-note">Base : 0,36 € / u</div>
             </div>
-            <div class="field">
+            <div class="field" id="fPrixAgrafe">
               <label for="prixAgrafe">Agrafe (€ / u)</label>
-              <input type="number" step="0.001" id="prixAgrafe" value="0.015"/>
+              <input type="text" inputmode="decimal" step="0.001" id="prixAgrafe" value="0.015"/>
               <div class="mini-note">Base : 0,015 € / u</div>
             </div>
-            <div class="field">
+            <div class="field" id="fPrixVernis">
               <label for="prixVernis">Vernis (€ / L)</label>
-              <input type="number" step="0.001" id="prixVernis" value="8"/>
+              <input type="text" inputmode="decimal" step="0.001" id="prixVernis" value="8"/>
               <div class="mini-note">Base : 8,00 € / L</div>
             </div>
           </div>
@@ -1315,34 +1316,34 @@
         <div class="annexe-card">
           <div class="annexe-title">Ratios techniques</div>
           <div class="grid-2">
-            <div class="field">
+            <div class="field" id="fRatioAcier">
               <label for="ratioAcier">Acier (ml / m²)</label>
-              <input type="number" step="0.1" id="ratioAcier" value="12"/>
+              <input type="text" inputmode="decimal" step="0.1" id="ratioAcier" value="12"/>
               <div class="mini-note">Base : 12 ml / m²</div>
             </div>
-            <div class="field">
+            <div class="field" id="fRatioGrillage">
               <label for="ratioGrillage">Grillage (m² / m²)</label>
-              <input type="number" step="0.01" id="ratioGrillage" value="1.1"/>
+              <input type="text" inputmode="decimal" step="0.01" id="ratioGrillage" value="1.1"/>
               <div class="mini-note">Base : 1,1 · Inclut 10 % recouvrement</div>
             </div>
-            <div class="field">
+            <div class="field" id="fRatioBeton">
               <label for="ratioBeton">Béton (sacs / m²)</label>
-              <input type="number" step="0.1" id="ratioBeton" value="3.4"/>
+              <input type="text" inputmode="decimal" step="0.1" id="ratioBeton" value="3.4"/>
               <div class="mini-note">Moy. : 3,4 — Sup. : 3,8</div>
             </div>
-            <div class="field">
+            <div class="field" id="fRatioBaguette">
               <label for="ratioBaguette">Baguettes (u / m²)</label>
-              <input type="number" step="0.1" id="ratioBaguette" value="6"/>
+              <input type="text" inputmode="decimal" step="0.1" id="ratioBaguette" value="6"/>
               <div class="mini-note">Base : 6 u / m²</div>
             </div>
-            <div class="field">
+            <div class="field" id="fRatioAgrafe">
               <label for="ratioAgrafe">Agrafes (u / m²)</label>
-              <input type="number" step="1" id="ratioAgrafe" value="50"/>
+              <input type="text" inputmode="decimal" step="1" id="ratioAgrafe" value="50"/>
               <div class="mini-note">Base : 50 u / m²</div>
             </div>
-            <div class="field">
+            <div class="field" id="fRatioVernis">
               <label for="ratioVernis">Vernis (L / m²)</label>
-              <input type="number" step="0.01" id="ratioVernis" value="0.2"/>
+              <input type="text" inputmode="decimal" step="0.01" id="ratioVernis" value="0.2"/>
               <div class="mini-note">Base : 0,2 L / m²</div>
             </div>
           </div>
@@ -1566,6 +1567,7 @@
 ════════════════════════════════════════ */
 const H_PAR_JOUR = 8;
 const SURF_WARN   = 5000;
+const MARGE_WARN  = 200;
 
 const KEYS = {
   settings: "ard_settings_v12",
@@ -1580,6 +1582,14 @@ const DEFAULT_SETTINGS = {
 };
 
 const SETTING_IDS = Object.keys(DEFAULT_SETTINGS);
+
+// Tous les champs numériques du formulaire (texte + inputmode="decimal"),
+// nettoyés en direct pour n'accepter que chiffres / virgule / point / signe moins en tête.
+const NUMERIC_IDS = [
+  "surfaceMoins3","surfacePlus3","heuresRoute",
+  "mainOeuvre","logement","locationMateriel","margePct",
+  ...SETTING_IDS
+];
 
 /* ════════════════════════════════════════
    ÉTAT
@@ -1624,6 +1634,26 @@ const ui = {
 ════════════════════════════════════════ */
 function toNum(v){ return Number(String(v||0).replace(",",".")) || 0 }
 
+// Nettoie en direct la saisie d'un champ numérique (texte) : ne garde que
+// chiffres, virgule, point, et un signe moins uniquement en tête. Bloque donc
+// lettres, émojis, symboles collés/copiés — sans dépendre du filtrage natif
+// du navigateur (perdu en passant de type="number" à type="text" pour
+// autoriser la virgule décimale française).
+function sanitizeNumInput(el){
+  const before = el.value;
+  let v = before.replace(/[^\d,.\-]/g, "");
+  v = v.replace(/(?!^)-/g, "");
+  let sepSeen = false;
+  v = v.replace(/[,.]/g, m => { if(sepSeen) return ""; sepSeen = true; return m; });
+  v = v.replace(/^(-?)0+(?=\d)/, "$1"); // évite les "025" au lieu de "25"
+  if(v !== before){
+    const pos = el.selectionStart;
+    const delta = before.length - v.length;
+    el.value = v;
+    try{ el.setSelectionRange(Math.max(0,pos-delta), Math.max(0,pos-delta)); }catch(e){}
+  }
+}
+
 function fmtMoney(v){
   return new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(v||0);
 }
@@ -1653,19 +1683,23 @@ function dateFr(){ return new Date().toLocaleDateString("fr-FR") }
    SETTINGS
 ════════════════════════════════════════ */
 function getSettings(){
-  const s = JSON.parse(localStorage.getItem(KEYS.settings)||"null");
+  let s = null;
+  try{ s = JSON.parse(localStorage.getItem(KEYS.settings)||"null"); }
+  catch(e){ s = null; }
   return {...DEFAULT_SETTINGS,...(s||{})};
 }
 
 function saveSettings(){
   const p={};
   SETTING_IDS.forEach(id => p[id]=toNum($(id).value));
+  p.betonManuel = state.betonManuel;
   localStorage.setItem(KEYS.settings, JSON.stringify(p));
 }
 
 function applySettings(){
   const s = getSettings();
   SETTING_IDS.forEach(id => $(id).value = s[id]);
+  state.betonManuel = !!s.betonManuel;
 }
 
 function betonDefault(){ return state.qualite==="superieure" ? 3.8 : 3.4 }
@@ -1878,6 +1912,38 @@ function validate(){
     }
   });
 
+  // Marge (avertissement non bloquant au-delà d'un seuil improbable)
+  const marge = toNum($("margePct").value);
+  if(marge<0){
+    setMsg("fMarge",$("margePct"),"error","Marge négative impossible.");
+    errors.push("Marge : valeur négative."); ok=false;
+  } else if(marge>MARGE_WARN){
+    setMsg("fMarge",$("margePct"),"warn",`${fmtNum(marge,1)} % — marge inhabituelle, vérifier avant envoi au client.`);
+  } else {
+    clearMsg("fMarge",$("margePct"));
+  }
+
+  // Annexe coûts — prix & ratios (négatifs bloquants : un prix ou un ratio
+  // négatif fausse silencieusement tout le devis, y compris vers le client)
+  const ANNEXE_LABELS = {
+    prixAcier:"Prix acier", prixGrillage:"Prix grillage", prixBeton:"Prix béton",
+    prixBaguette:"Prix baguette", prixAgrafe:"Prix agrafe", prixVernis:"Prix vernis",
+    ratioAcier:"Ratio acier", ratioGrillage:"Ratio grillage", ratioBeton:"Ratio béton",
+    ratioBaguette:"Ratio baguette", ratioAgrafe:"Ratio agrafe", ratioVernis:"Ratio vernis"
+  };
+  SETTING_IDS.forEach(id=>{
+    const fid = "f"+id.charAt(0).toUpperCase()+id.slice(1);
+    const el  = $(id), fieldEl = $(fid);
+    if(!fieldEl) return;
+    const v = toNum(el.value);
+    if(v<0){
+      setMsg(fid,el,"error",`${ANNEXE_LABELS[id]} : valeur négative impossible.`);
+      errors.push(`${ANNEXE_LABELS[id]} : valeur négative.`); ok=false;
+    } else {
+      clearMsg(fid,el);
+    }
+  });
+
   return {ok, errors};
 }
 
@@ -1968,7 +2034,10 @@ function fillResults(d){
 /* ════════════════════════════════════════
    PROJETS ENREGISTRÉS
 ════════════════════════════════════════ */
-function getProjects(){ return JSON.parse(localStorage.getItem(KEYS.projects)||"[]") }
+function getProjects(){
+  try{ return JSON.parse(localStorage.getItem(KEYS.projects)||"[]") }
+  catch(e){ return [] }
+}
 function setProjects(p){ localStorage.setItem(KEYS.projects,JSON.stringify(p)) }
 
 function saveProject(data){
@@ -2095,7 +2164,7 @@ function buildWA(d){
   lines.push(`  Chantier   : ${fmtNum(d.tChan)} j (${fmtWeeks(d.tChan)})`);
   if(d.tRoute>0) lines.push(`  Route      : ${fmtNum(d.tRoute)} j`);
   lines.push(`  Total      : ${fmtNum(d.tTotal)} j (${fmtWeeks(d.tTotal)})`);
-  lines.push(`  ► Arrondi  : ${fmtNum(d.tAr,0)} jours`);
+  lines.push(`  ► Arrondi  : ${fmtNum(d.tAr,0)} jour${d.tAr>1?"s":""}`);
   lines.push(`\nMATÉRIAUX :`);
   lines.push(`  Acier    : ${fmtNum(d.qty.acier)} ml`);
   lines.push(`  Grillage : ${fmtNum(d.qty.grillage)} m²`);
@@ -2191,7 +2260,7 @@ function openPdf(){
           <tr><td>Chantier</td><td>${fmtNum(d.tChan)} j · ${fmtWeeks(d.tChan)}</td></tr>
           ${rowR}
           <tr><td>Total</td><td>${fmtNum(d.tTotal)} j · ${fmtWeeks(d.tTotal)}</td></tr>
-          <tr class="total-row"><td>Total arrondi</td><td>${fmtNum(d.tAr,0)} jours</td></tr>
+          <tr class="total-row"><td>Total arrondi</td><td>${fmtNum(d.tAr,0)} jour${d.tAr>1?"s":""}</td></tr>
         </table>
       </div>
     </div>
@@ -2219,7 +2288,7 @@ function openPdf(){
     ${rowDevis}
     <div class="final-box">
       <div class="fl">Total arrondi</div>
-      <div><span class="fv">${fmtNum(d.tAr,0)}</span><span class="fu">jours</span></div>
+      <div><span class="fv">${fmtNum(d.tAr,0)}</span><span class="fu">jour${d.tAr>1?"s":""}</span></div>
     </div>
   </div></body></html>`);
   win.document.close();
@@ -2228,6 +2297,14 @@ function openPdf(){
 /* ════════════════════════════════════════
    EVENTS
 ════════════════════════════════════════ */
+// Nettoyage anti-lettres/émojis — enregistré EN PREMIER sur chaque champ
+// numérique, pour s'exécuter avant les autres écouteurs "input" ci-dessous
+// (aperçus, validation) et leur garantir une valeur toujours propre.
+NUMERIC_IDS.forEach(id=>{
+  const el = $(id);
+  if(el) el.addEventListener("input", ()=>sanitizeNumInput(el));
+});
+
 // Choix qualité / conditions
 document.querySelectorAll(".choice").forEach(btn=>{
   btn.addEventListener("click",()=>{
@@ -2246,6 +2323,8 @@ document.querySelectorAll(".choice").forEach(btn=>{
     const map={surfaceMoins3:"fMoins3",surfacePlus3:"fPlus3",heuresRoute:"fRoute"};
     if(map[inp.id]){ clearMsg(map[inp.id],inp); ui.formAlert.classList.remove("show") }
   });
+  inp.addEventListener("focus",e=>e.target.select());
+  inp.addEventListener("click",e=>e.target.select());
 });
 
 // Champs optionnels
@@ -2258,7 +2337,7 @@ document.querySelectorAll(".choice").forEach(btn=>{
 });
 
 // Marge
-$("margePct").addEventListener("input", updateMargePreview);
+$("margePct").addEventListener("input",()=>{ clearMsg("fMarge",$("margePct")); ui.formAlert.classList.remove("show"); updateMargePreview(); });
 $("margePct").addEventListener("focus", e=>e.target.select());
 $("margePct").addEventListener("click", e=>e.target.select());
 
@@ -2268,7 +2347,13 @@ ui.nom.addEventListener("input",()=>clearMsg("fNom",ui.nom));
 // Settings
 SETTING_IDS.forEach(id=>{
   const el=$(id);
-  el.addEventListener("input",()=>{ if(id==="ratioBeton") state.betonManuel=true; saveSettings() });
+  const fid = "f"+id.charAt(0).toUpperCase()+id.slice(1);
+  el.addEventListener("input",()=>{
+    if(id==="ratioBeton") state.betonManuel=true;
+    saveSettings();
+    if($(fid)){ clearMsg(fid,el); ui.formAlert.classList.remove("show"); }
+    updateMargePreview();
+  });
   el.addEventListener("focus",e=>e.target.select());
   el.addEventListener("click",e=>e.target.select());
 });
